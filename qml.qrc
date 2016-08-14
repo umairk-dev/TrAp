@@ -4,6 +4,7 @@
         <file>MainForm.ui.qml</file>
         <file>Map.qml</file>
         <file>map.html</file>
+        <file>setting.png</file>
         <file>Searching.qml</file>
     </qresource>
 </RCC>
