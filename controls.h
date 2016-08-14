@@ -6,11 +6,11 @@
 #include <QQuickItem>
 #include <QWidget>
 
-class Controls : public QWidget
+class Controls : public QObject
 {
     Q_OBJECT
 public:
-    explicit Controls(QWidget  *parent = 0);
+    explicit Controls(QObject  *parent = 0);
     Q_INVOKABLE  void onHello();
      Q_INVOKABLE  void setEngine(QQmlApplicationEngine *engine);
 

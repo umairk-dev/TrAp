@@ -9,10 +9,33 @@ import QtQuick.Dialogs 1.2
 
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
-    width: 640
-    height : 400
+    width: screenWidth
+    height : screenHeight
     visible: true
     id : window
+
+    property string platform: platform
+    property string mapUrl: initialUrl
+    property bool isSearchScreen: false
+    property int ppi: Screen.pixelDensity*25.4
+
+    property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
+                                        "XXXHDPI","XXXXHDPI"]
+    readonly property int ppiRange:{
+     if (ppi>=540)
+      5
+     else if (ppi>=360)
+      4
+     else if (ppi>=270)
+      3
+     else if (ppi>=180)
+      2
+     else if (ppi>=135)
+      1
+     else
+      0
+     }
+
 
     //signals
     signal submitTextField(string text)
@@ -27,13 +50,20 @@ ApplicationWindow  {
     }
 
 
+    function doSearch(text){
+        window.isSearchScreen = false;
+      //  window.newWidth = screenWidth
+      //  window.newHeight = screenHeight
+        console.log("Search: " + text)
+    }
+
 
     Menu {
         id: menuFile
         title: qsTr("&File")
         MenuItem {
             text: qsTr("&Open")
-            onTriggered: messageDialog.show(qsTr("Open action triggered"));
+            onTriggered: submitTextField("hello")
         }
         MenuItem {
             text: qsTr("E&xit")
@@ -44,40 +74,68 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
-
+                Item { Layout.fillWidth: true }
                 ToolButton {
-                    text: "Search"
-                    //iconSource: "open.png"
-                    onClicked: submitTextField("hello")
+
+                    iconSource: "./images/" + dir[ppiRange] +"/search.png"
+                    onClicked: if(window.isSearchScreen == false){
+                                   window.isSearchScreen = true;
+                                 //  window.newWidth = screenWidth - screenWidth*.5
+                                   //window.newHeight = screenHeight - screenHeight*.5
+                                   stack.push(searchingView);}
+
                 }
                 ToolButton {
 
-                    iconSource: "setting.png"
+                    iconSource: "./images/" + dir[ppiRange] +"/setting.png"
                     onClicked: menuFile.popup()
                 }
                 ToolButton {
                     text: "About"
-                    iconSource: "save-as.png"
+                   //iconSource: "save-as.png"
+                    onClicked: console.log(dir[ppiRange])
                 }
-                Item { Layout.fillWidth: true }
-                CheckBox {
-                    text: "Enabled"
-                    checked: true
-                    Layout.alignment: Qt.AlignRight
-                }
+
+
             }
         }
 
 
 
+    StackView {
+          id: stack
+          anchors.fill: parent
+          anchors.bottom: parent.toolBar
 
-    Map{
-        anchors.rightMargin: 0
-        anchors.bottomMargin: 0
-        anchors.leftMargin: 0
-        anchors.topMargin: 0
-        anchors.fill: parent
-        anchors.bottom: parent.toolBar
-        url: initialUrl
+          delegate: StackViewDelegate {
+                 function transitionFinished(properties){
+                     if(window.platform.localeCompare("desktop")){
+                        properties.exitItem.visible = true
+                     }
+                 }
+             }
     }
+
+
+
+    Component {
+        id: mapView
+
+        Map{
+            property string _url : window.mapUrl
+        }
+    }
+
+
+    Component {
+            id: searchingView
+            Searching {
+                id: f2
+
+
+
+            }
+        }
+
+    Component.onCompleted: stack.push(mapView)
 }

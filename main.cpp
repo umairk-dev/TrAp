@@ -1,10 +1,13 @@
-#include <QApplication>
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtWebView/QtWebView>
 #include <QQmlContext>
 #include "controls.h"
 #include <QQuickWindow>
-
+#include <QDir>
+#include <QString>
+#include <QStandardPaths>
+#include <QScreen>
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
 #else
@@ -12,28 +15,18 @@
 #endif
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     QtWebView::initialize();
     Controls control;
 
+
+    QScreen * screen = app.primaryScreen();
+    int width = screen->availableSize().width();
+    int height = screen->availableSize().height();
+
+
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     control.setEngine(&engine);
-
-
-    QObject *topLevel = engine.rootObjects().value(0);
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
-
-
-
-    // connect our QML signal to our C++ slot
-    QObject::connect(topLevel, SIGNAL(submitTextField(QString)),
-    &control, SLOT(handleSubmitTextField(QString)));
-
-    //connect c++ to qml for sending data
-    QObject::connect(&control, SIGNAL(setTextField(QVariant)),
-    topLevel, SLOT(setTextField(QVariant)));
-
 
 
     QQmlContext *context = engine.rootContext();
@@ -44,17 +37,39 @@ int main(int argc, char *argv[])
     helpHTMLFile.append("map.html");
     QFile(helpHTMLFile).remove();
     QFile(":/map.html").copy(helpHTMLFile);
-    context->setContextProperty(QStringLiteral("initialUrl"),
+    context->setContextProperty("initialUrl",
                                    "file:///"+helpHTMLFile);
-
-    #endif
-    //*********************
-    #ifdef Q_OS_DESKTOP
-    context->setContextProperty(QStringLiteral("initialUrl"),
+    context->setContextProperty(QStringLiteral("platform"),
+                            "mobile");
+    #else
+        context->setContextProperty(QStringLiteral("initialUrl"),
                                 QUrl(QStringLiteral("qrc:/map.html")));
+        context->setContextProperty(QStringLiteral("platform"),
+                                "desktop");
     #endif
 
     context->setContextProperty("Controls", &control);
+    context->setContextProperty(QStringLiteral("screenWidth"),
+                            width);
+    context->setContextProperty(QStringLiteral("screenHeight"),
+                            height);
+
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+
+    QObject *topLevel = engine.rootObjects().value(0);
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
+
+
+
+    // connect our QML signal to our C++ slot
+    QObject::connect(window, SIGNAL(submitTextField(QString)),
+    &control, SLOT(handleSubmitTextField(QString)));
+
+    //connect c++ to qml for sending data
+    QObject::connect(&control, SIGNAL(setTextField(QVariant)),
+    window, SLOT(setTextField(QVariant)));
+
 
     return app.exec();
 }

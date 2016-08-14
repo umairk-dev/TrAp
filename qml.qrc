@@ -4,7 +4,15 @@
         <file>MainForm.ui.qml</file>
         <file>Map.qml</file>
         <file>map.html</file>
-        <file>setting.png</file>
         <file>Searching.qml</file>
+        <file>TestDialog.qml</file>
+        <file>images/MDPI/setting.png</file>
+        <file>images/XHDPI/setting.png</file>
+        <file>images/XXHDPI/setting.png</file>
+        <file>images/XXXHDPI/setting.png</file>
+        <file>images/XHDPI/search.png</file>
+        <file>images/MDPI/search.png</file>
+        <file>images/XXHDPI/search.png</file>
+        <file>images/XXXHDPI/search.png</file>
     </qresource>
 </RCC>

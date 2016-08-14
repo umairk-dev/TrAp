@@ -4,7 +4,7 @@
 #include <QDialog>
 
 
-Controls::Controls(QWidget  *parent) : QWidget (parent)
+Controls::Controls(QObject  *parent) : QObject (parent)
 {
 
 }
