@@ -4,5 +4,6 @@
         <file>MainForm.ui.qml</file>
         <file>Map.qml</file>
         <file>map.html</file>
+        <file>Searching.qml</file>
     </qresource>
 </RCC>
