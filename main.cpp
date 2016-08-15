@@ -40,12 +40,12 @@ int main(int argc, char *argv[])
     context->setContextProperty("initialUrl",
                                    "file:///"+helpHTMLFile);
     context->setContextProperty(QStringLiteral("platform"),
-                            "mobile");
+                           "1");
     #else
         context->setContextProperty(QStringLiteral("initialUrl"),
                                 QUrl(QStringLiteral("qrc:/map.html")));
         context->setContextProperty(QStringLiteral("platform"),
-                                "desktop");
+                                "2");
     #endif
 
     context->setContextProperty("Controls", &control);

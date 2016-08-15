@@ -14,7 +14,7 @@ ApplicationWindow  {
     visible: true
     id : window
 
-    property string platform: platform
+    property string _platform: platform
     property string mapUrl: initialUrl
     property bool isSearchScreen: false
     property int ppi: Screen.pixelDensity*25.4
@@ -109,7 +109,8 @@ ApplicationWindow  {
 
           delegate: StackViewDelegate {
                  function transitionFinished(properties){
-                     if(window.platform.localeCompare("desktop")){
+
+                     if(window._platform === "2"){
                         properties.exitItem.visible = true
                      }
                  }
@@ -131,9 +132,6 @@ ApplicationWindow  {
             id: searchingView
             Searching {
                 id: f2
-
-
-
             }
         }
 
