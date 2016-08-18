@@ -56,20 +56,21 @@ int main(int argc, char *argv[])
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-
     QObject *topLevel = engine.rootObjects().value(0);
     QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
-
 
 
     // connect our QML signal to our C++ slot
     QObject::connect(window, SIGNAL(submitTextField(QString)),
     &control, SLOT(handleSubmitTextField(QString)));
 
+    //search signal
+    QObject::connect(window, SIGNAL(searchByName(QString)),
+    &control, SLOT(searchCyclone(QString)));
+
     //connect c++ to qml for sending data
     QObject::connect(&control, SIGNAL(setTextField(QVariant)),
     window, SLOT(setTextField(QVariant)));
-
 
     return app.exec();
 }

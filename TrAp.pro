@@ -4,7 +4,8 @@ QT += qml quick webview widgets
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    controls.cpp
+    controls.cpp \
+    cyclone.cpp
 
 RESOURCES += qml.qrc
 
@@ -34,4 +35,5 @@ DISTFILES += \
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 HEADERS += \
-    controls.h
+    controls.h \
+    cyclone.h
