@@ -39,6 +39,7 @@ ApplicationWindow  {
 
     //signals
     signal submitTextField(string text)
+    signal searchByName(string text)//18082016
 
 
 
@@ -50,11 +51,20 @@ ApplicationWindow  {
     }
 
 
-    function doSearch(text){
+    function doSearch(type, content){
         window.isSearchScreen = false;
+        if(type === "name")
+        {
+            searchByName(content);
+        }else if(type === "year" ){
+
+        }else if(type === "country" ){
+
+        }
+
       //  window.newWidth = screenWidth
       //  window.newHeight = screenHeight
-        console.log("Search: " + text)
+        console.log("Search: " + content)
     }
 
 

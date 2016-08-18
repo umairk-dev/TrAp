@@ -11,7 +11,7 @@ class Controls : public QObject
     Q_OBJECT
 
 private:
-    void serviceRequestFinished(QNetworkReply* reply);
+
 public:
     explicit Controls(QObject  *parent = 0);
     Q_INVOKABLE  void onHello();
@@ -25,6 +25,7 @@ private:
 public slots:
       void handleSubmitTextField(const QString& in);
       void searchCyclone(const QString& name);
+      void serviceRequestFinished(QNetworkReply* reply);
 };
 
 #endif // CONTROLS_H

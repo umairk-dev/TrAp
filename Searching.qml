@@ -94,10 +94,24 @@ Rectangle {
             id: buttonSearch
             text: qsTr("Search")
             onClicked: {
-                //var prev = stack.get(f2.Stack.index - 1)
-                //prev.
+                /*18082016 [S] Search signal*/
+                var type,content;
+                if(radioButtonName.checked == true)
+                {
+                    type = "name"
+                    content = textFieldKeyword.text
+                }else if(radioButtonYear.checked == true)
+                {
+                    type = "year"
+                    content = textFieldKeyword.text
+                }else if(radioButtonCountry.checked == true)
+                {
+                    type = "country"
+                    content= comboBoxCountry.currentText
+                }
+                /*18082016 [E] Search signal*/
+                doSearch(type,content)
 
-                doSearch(textFieldKeyword.text)
                 stack.pop()
             }
             Layout.topMargin: 10
