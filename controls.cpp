@@ -2,8 +2,9 @@
 #include <QtGui>
 #include <QtQuick>
 #include <QDialog>
-
-
+#include <QObject>
+#include "cyclone.h"
+#include "cyclonetrack.h"
 Controls::Controls(QObject  *parent) : QObject (parent)
 {
 
@@ -15,11 +16,10 @@ void Controls::onHello(){
 }
 
 
+
+
 void Controls::setEngine(QQmlApplicationEngine * engine){
-
     _engine = engine;
-
-
 }
 
 
@@ -35,16 +35,16 @@ void Controls::searchCyclone(const QString &name)
 
        QNetworkAccessManager * nam = new QNetworkAccessManager(this);
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-                this, SLOT(serviceRequestFinished(QNetworkReply*)));
+                this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
 
-       QUrl url("http://date.jsontest.com/?name=" + name );
+       QUrl url("http://smarttechsoft.com/test.php?name=" + name );
        QNetworkReply* reply = nam->get(QNetworkRequest(url));
 
       // emit setTextField(in.toUpper());
 }
 
 
-void Controls::serviceRequestFinished(QNetworkReply* reply)
+void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 {
     if(reply->error() == QNetworkReply::NoError) {
 
@@ -53,26 +53,84 @@ void Controls::serviceRequestFinished(QNetworkReply* reply)
 
         QString strReply = reply->readAll();
 
-        qDebug() << strReply;
+        //
 
         QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
 
         QJsonObject jsonObject = jsonResponse.object();
 
-   //     QJsonArray jsonArray = jsonObject["time"].toArray();
 
-        qDebug() << jsonObject["time"].toString();
+        QVariantList cyclones;
 
-        qDebug() << jsonObject["date"].toString();
+        if(jsonObject.keys().contains("cyclones")){
+            qDebug() << strReply;
+            QJsonArray jsonArray = jsonObject["cyclones"].toArray();
+            foreach (const QJsonValue & value, jsonArray)
+            {
+                QJsonObject obj = value.toObject();
+                Cyclone * cyclone = new Cyclone;
+                cyclone->setCycloneName(obj["cycloneName"].toString());
+                cyclone->setCycloneID(obj["cycloneId"].toString());
+                cyclone->setBasin(obj["basin"].toString());
+                cyclone->setSubBasin(obj["sub_basin"].toString());
+                cyclone->setSeasonYear(obj["seasonYear"].toString());
+           //     cyclone.setNum(obj["num"].toString());
 
-/*        foreach (const QJsonValue & value, jsonArray)
-        {
-            QJsonObject obj = value.toObject();
-            qDebug() << value.toString();
+
+
+                QVariantList cycloneTracks;
+                if(obj.keys().contains("tracks")){
+
+                    QJsonArray tracksArray = obj["tracks"].toArray();
+                    qDebug() << tracksArray.size();
+                    foreach (const QJsonValue & valueT, tracksArray)
+                    {
+                        QJsonObject objT = valueT.toObject();
+                        CycloneTrack * tracks = new CycloneTrack;
+                        tracks->setCycloneID(objT["cycloneId"].toString());
+                        tracks->setTrackID(objT["trackId"].toString());
+                        tracks->setLongitude(objT["longitude"].toString());
+                        tracks->setLatitude(objT["latitude"].toString());
+                        tracks->setPressure(objT["pressure"].toString());
+                        tracks->setWindSpeed(objT["windSpeed"].toString());
+                        tracks->setNature(objT["nature"].toString());
+                        tracks->setDateTime(objT["dateTime"].toString());
+
+                        QVariant varT;
+                        varT.setValue(tracks);
+                        cycloneTracks.append(varT);
+                    }
+                        qDebug() << "tracks" << cycloneTracks.size();
+
+                        cyclone->setTracks(cycloneTracks);
+                }
+                QVariant varC;
+                varC.setValue(cyclone);
+                cyclones.append(varC);
+            }
         }
-*/
+
+        qDebug() << cyclones.size();
+        QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
+        if(webView)
+        {
 
 
+              qDebug() << "found";
+              if(cyclones.size() > 0){
+                  if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
+                      qDebug() << "Failed to invoke push";
+              }else{
+                  QString notFound = "Not Found";
+
+                  if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(notFound))))
+                      qDebug() << "Failed to invoke push";
+              }
+
+
+        }else{
+            qDebug() << "notfound";
+        }
     } else {
         qDebug() << "ERROR";
     }

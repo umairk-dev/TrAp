@@ -8,6 +8,8 @@
 #include <QString>
 #include <QStandardPaths>
 #include <QScreen>
+#include "controls.h"
+#include "cyclone.h"
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
 #else
@@ -16,9 +18,10 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+     qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
     QtWebView::initialize();
     Controls control;
-
+   // qmlRegisterType(Cyclone);
 
     QScreen * screen = app.primaryScreen();
     int width = screen->availableSize().width();
@@ -56,6 +59,11 @@ int main(int argc, char *argv[])
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
+  //  QQmlComponent component(&engine, QUrl(QStringLiteral("qrc:/main.qml")));
+    //    QObject *object = component.create();
+
+
+
     QObject *topLevel = engine.rootObjects().value(0);
     QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
 
@@ -68,9 +76,37 @@ int main(int argc, char *argv[])
     QObject::connect(window, SIGNAL(searchByName(QString)),
     &control, SLOT(searchCyclone(QString)));
 
+
+
+    //search signal
+    //QObject::connect(window, SIGNAL(sendWebView(QWebEngineView)),
+    //&control, SLOT(getWebView(QWebEngineView)));
+
+
+
     //connect c++ to qml for sending data
     QObject::connect(&control, SIGNAL(setTextField(QVariant)),
     window, SLOT(setTextField(QVariant)));
+
+    QObject *webView = engine.rootObjects().at(0)->findChild<QObject*>("map");
+    if(webView)
+      {
+          qDebug() << "found";
+
+        //  if(!QMetaObject::invokeMethod(webView, "zoomIn"))
+       //       qDebug() << "Failed to invoke push";
+          //QQmlComponent component(&engine, QStringLiteral("qrc:/Searching.qml"));
+          //QObject *object = component.create();
+          //QVariant arg = QVariant::fromValue(object);
+
+          //if(!QMetaObject::invokeMethod(stackView, "push",
+              //                          Q_ARG(QVariant, arg)))
+            //  qDebug() << "Failed to invoke push";
+      }else{
+
+        qDebug() << "notfound";
+
+    }
 
     return app.exec();
 }

@@ -5,8 +5,7 @@ import QtWebView 1.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
-
-
+import Cyclone 1.0
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
     width: screenWidth
@@ -14,6 +13,9 @@ ApplicationWindow  {
     visible: true
     id : window
 
+    Cyclone{
+
+    }
     property string _platform: platform
     property string mapUrl: initialUrl
     property bool isSearchScreen: false
@@ -40,6 +42,7 @@ ApplicationWindow  {
     //signals
     signal submitTextField(string text)
     signal searchByName(string text)//18082016
+  //  signal sendWebView(WebEngineView view)
 
 
 
@@ -47,7 +50,7 @@ ApplicationWindow  {
     function setTextField(text){
          console.log("setTextField: " + text)
 
-
+        stack.zoomIn();
     }
 
 
@@ -116,7 +119,7 @@ ApplicationWindow  {
           id: stack
           anchors.fill: parent
           anchors.bottom: parent.toolBar
-
+          objectName: "stack"
           delegate: StackViewDelegate {
                  function transitionFinished(properties){
 
@@ -125,6 +128,13 @@ ApplicationWindow  {
                      }
                  }
              }
+
+
+          function zoomIn(){
+
+              mapView.webView.zoomIn();
+
+          }
     }
 
 
@@ -132,9 +142,31 @@ ApplicationWindow  {
     Component {
         id: mapView
 
-        Map{
-            property string _url : window.mapUrl
+        WebView{
+             id: webView
+             anchors.fill: parent
+             url: window.mapUrl
+            objectName: "map"
+
+            function searchResult(data){
+
+                if(data.size() > 0){
+                    console.log(data[0].cycloneName);
+                    console.log(data[0].cycloneID);
+                    console.log(data[0].basin);
+                    console.log(data[0].subBasin);
+                    console.log(data[0].seasonYear);
+
+
+                    webView.runJavaScript("alert('hello');");
+                }
+            }
         }
+
+        /*Map{
+            id : map
+            property string _url : window.mapUrl
+        }*/
     }
 
 
@@ -145,5 +177,6 @@ ApplicationWindow  {
             }
         }
 
-    Component.onCompleted: stack.push(mapView)
+    Component.onCompleted: { stack.push(mapView); }
+
 }

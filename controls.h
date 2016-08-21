@@ -25,7 +25,9 @@ private:
 public slots:
       void handleSubmitTextField(const QString& in);
       void searchCyclone(const QString& name);
-      void serviceRequestFinished(QNetworkReply* reply);
+      void searchCycloneServiceFinished(QNetworkReply* reply);
+      //void getWebView(QWebEngineView * view);
+
 };
 
 #endif // CONTROLS_H
