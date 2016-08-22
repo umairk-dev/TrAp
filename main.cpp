@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     QtWebView::initialize();
     Controls control;
    // qmlRegisterType(Cyclone);
-
+QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 21082016
     QScreen * screen = app.primaryScreen();
     int width = screen->availableSize().width();
     int height = screen->availableSize().height();

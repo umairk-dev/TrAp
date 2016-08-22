@@ -117,15 +117,15 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
 
               qDebug() << "found";
-              if(cyclones.size() > 0){
+          //    if(cyclones.size() > 0){
                   if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
                       qDebug() << "Failed to invoke push";
-              }else{
-                  QString notFound = "Not Found";
+          /*    }else{
+                 QString notFound = "Not Found";//
 
                   if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(notFound))))
                       qDebug() << "Failed to invoke push";
-              }
+            //  }*/
 
 
         }else{

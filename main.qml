@@ -6,23 +6,28 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 import Cyclone 1.0
+import QtLocation 5.5
+import QtPositioning 5.3
+
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
     width: screenWidth
     height : screenHeight
+    color: "#4355e6"
     visible: true
     id : window
 
-    Cyclone{
-
-    }
     property string _platform: platform
     property string mapUrl: initialUrl
     property bool isSearchScreen: false
     property int ppi: Screen.pixelDensity*25.4
-
+    property variant cycloneInfo: []
     property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
                                         "XXXHDPI","XXXXHDPI"]
+
+    property var track_colours: ['yellow','green','red','pink','white','ruby']
+    property var intensity_colours: ['#ffffff','#3333ff','#006699','#009933','#cc9900','#cc0000','#cc00cc']
+
     readonly property int ppiRange:{
      if (ppi>=540)
       5
@@ -43,8 +48,6 @@ ApplicationWindow  {
     signal submitTextField(string text)
     signal searchByName(string text)//18082016
   //  signal sendWebView(WebEngineView view)
-
-
 
     // slots
     function setTextField(text){
@@ -113,8 +116,6 @@ ApplicationWindow  {
             }
         }
 
-
-
     StackView {
           id: stack
           anchors.fill: parent
@@ -136,40 +137,105 @@ ApplicationWindow  {
 
           }
     }
+    Plugin {
+        id: mapProvider
+        name: "mapbox"
+        PluginParameter { name: "useragent"; value: "TrAp" }
+        PluginParameter { name: "mapbox.access_token"; value: "sk.eyJ1IjoidW1haXIzMDQiLCJhIjoiY2lzNGZkN2w0MDhwejJzbzB0ZmI0ZWp4MCJ9.7ix5rlax1msmBda2ZOeOlQ"}
+        PluginParameter { name: "mapbox.map_id"; value: "mapbox.satellite" }
+    }
+
+//    MapPolyline{
+//        id : lines
+//        line.width: 10
+//        line.color: 'yellow'
+
+//    }
+//mycentre
+Location{
+    id: myCentre
+    coordinate {
+        latitude : -30.00
+        longitude : 135.00
+    }
+}
 
 
+Component {
+    id: mapView
+    Map {
+        id : map
+        objectName: "map"
+        anchors.fill: parent
+        plugin: mapProvider
+        gesture.enabled: true
+        center : myCentre.coordinate //22082016
+        zoomLevel: 4
+//        activeMapType: supportedMapTypes[1]
 
-    Component {
-        id: mapView
+        //1. each cyclone track woule be the same color
+        //2. the point of cyclone use different color show the intensity
+        function searchResult(data){
+            //ToDo: clear function
 
-        WebView{
-             id: webView
-             anchors.fill: parent
-             url: window.mapUrl
-            objectName: "map"
-
-            function searchResult(data){
-
-                if(data.size() > 0){
-                    console.log(data[0].cycloneName);
-                    console.log(data[0].cycloneID);
-                    console.log(data[0].basin);
-                    console.log(data[0].subBasin);
-                    console.log(data[0].seasonYear);
-
-
-                    webView.runJavaScript("alert('hello');");
+            //start drawing
+            if(data.length > 0){
+                // start drawing
+                for(var i=0;i<data.length;i++)
+                {
+//                    var co = Qt.createComponent('polyLine.qml')
+                    cycloneInfo.push(data[i])
+                    // drawing track (if tracks are available)
+                    if( data[i].tracks.length>0 )
+                    {
+                        var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)                        
+                        for(var j = 0; j < data[i].tracks.length;j++)
+                        {
+                            var circle = Qt.createQmlObject('import QtLocation 5.3; MapCircle {}',map)
+                            Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
+                            //Note: ET >  TS TD > SS SD >  L > NR
+                            switch(data[i].tracks[j].nature)
+                            {
+                                case 'NA':
+                                case 'NR':
+                                    circle.color = intensity_colours[0]
+                                    break
+                                case 'L':
+                                    circle.color = intensity_colours[1]
+                                    break
+                                case 'SS':
+                                    circle.color = intensity_colours[2]
+                                    break
+                                case 'SD':
+                                    circle.color = intensity_colours[3]
+                                    break
+                                case 'TS':
+                                    circle.color = intensity_colours[4]
+                                    break
+                                case 'TD':
+                                    circle.color = intensity_colours[5]
+                                    break
+                                case 'ET':
+                                    circle.color = intensity_colours[6]
+                                    break
+                            }
+                            //
+                            circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
+                            circle.radius = 10000.0
+                            circle.border.width = 5
+                            map.addMapItem(circle)
+                        }
+                            Polyline.line.color = track_colours[i%track_colours.length]//'yellow'
+                            Polyline.line.width = 3
+                            map.addMapItem(Polyline)
+                    }
                 }
+
             }
         }
 
-        /*Map{
-            id : map
-            property string _url : window.mapUrl
-        }*/
     }
-
-
+}
     Component {
             id: searchingView
             Searching {

@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>MainForm.ui.qml</file>
-        <file>map.html</file>
         <file>Searching.qml</file>
         <file>TestDialog.qml</file>
         <file>images/MDPI/setting.png</file>
