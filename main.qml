@@ -9,6 +9,8 @@ import Cyclone 1.0
 import QtLocation 5.5
 import QtPositioning 5.3
 
+
+
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
     width: screenWidth
@@ -17,6 +19,7 @@ ApplicationWindow  {
     visible: true
     id : window
 
+    property string info : ""
     property string _platform: platform
     property string mapUrl: initialUrl
     property bool isSearchScreen: false
@@ -44,6 +47,34 @@ ApplicationWindow  {
      }
 
 
+
+
+    /****************************************/
+
+
+
+    MessageDialog {
+        id: messageDialog
+        title: "Cyclone Info"
+        onAccepted: {
+            messageDialog.close()
+        }
+        Component.onCompleted: visible = false
+    }
+
+    //Info Box
+
+    function showInfo(_data, x, y){
+
+
+        messageDialog.text = _data;
+
+        messageDialog.open();
+    }
+
+
+    /*****************************************/
+
     //signals
     signal submitTextField(string text)
     signal searchByName(string text)//18082016
@@ -55,6 +86,7 @@ ApplicationWindow  {
 
         stack.zoomIn();
     }
+
 
 
     function doSearch(type, content){
@@ -116,6 +148,7 @@ ApplicationWindow  {
             }
         }
 
+
     StackView {
           id: stack
           anchors.fill: parent
@@ -163,78 +196,237 @@ Location{
 
 Component {
     id: mapView
-    Map {
-        id : map
-        objectName: "map"
+
+    Item{
         anchors.fill: parent
-        plugin: mapProvider
-        gesture.enabled: true
-        center : myCentre.coordinate //22082016
-        zoomLevel: 4
-//        activeMapType: supportedMapTypes[1]
 
-        //1. each cyclone track woule be the same color
-        //2. the point of cyclone use different color show the intensity
-        function searchResult(data){
-            //ToDo: clear function
+        Rectangle{
+            color: "red"
+            x : 0
+            y : 0
+            width: 0
+            height: 0
+            z : 55
+            id : dragRect
+        }
+            Rectangle{
+                z: 55
+                id: infoBox
+                visible: false
+                color: "white"
+                width:100
+                height : 100
+                Text {
+                    id: detail
+                    text: qsTr("text")
+                    color: "black"
+                }
 
-            //start drawing
-            if(data.length > 0){
-                // start drawing
-                for(var i=0;i<data.length;i++)
-                {
-//                    var co = Qt.createComponent('polyLine.qml')
-                    cycloneInfo.push(data[i])
-                    // drawing track (if tracks are available)
-                    if( data[i].tracks.length>0 )
+                Button{
+                    text: qsTr("OK")
+                    onClicked: {infoBox.visible = false}
+                }
+
+
+        }
+
+
+
+
+        Map {
+            id : map
+            objectName: "map"
+            anchors.fill: parent
+            plugin: mapProvider
+            gesture.enabled: true
+            center : myCentre.coordinate //22082016
+            zoomLevel: 4
+
+            property variant points : []
+
+
+    //        activeMapType: supportedMapTypes[1]
+
+            //1. each cyclone track woule be the same color
+            //2. the point of cyclone use different color show the intensity
+            function searchResult(data){
+                //ToDo: clear function
+
+                //start drawing
+                if(data.length > 0){
+                    // start drawing
+                    for(var i=0;i<data.length;i++)
                     {
-                        var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)                        
-                        for(var j = 0; j < data[i].tracks.length;j++)
+    //                    var co = Qt.createComponent('polyLine.qml')
+                        cycloneInfo.push(data[i])
+                        // drawing track (if tracks are available)
+                        if( data[i].tracks.length>0 )
                         {
-                            var circle = Qt.createQmlObject('import QtLocation 5.3; MapCircle {}',map)
-                            Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                            //Note: ET >  TS TD > SS SD >  L > NR
-                            switch(data[i].tracks[j].nature)
+                            var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)
+                            for(var j = 0; j < data[i].tracks.length;j++)
                             {
-                                case 'NA':
-                                case 'NR':
-                                    circle.color = intensity_colours[0]
-                                    break
-                                case 'L':
-                                    circle.color = intensity_colours[1]
-                                    break
-                                case 'SS':
-                                    circle.color = intensity_colours[2]
-                                    break
-                                case 'SD':
-                                    circle.color = intensity_colours[3]
-                                    break
-                                case 'TS':
-                                    circle.color = intensity_colours[4]
-                                    break
-                                case 'TD':
-                                    circle.color = intensity_colours[5]
-                                    break
-                                case 'ET':
-                                    circle.color = intensity_colours[6]
-                                    break
+                                var circle = Qt.createQmlObject('import QtLocation 5.3; MapCircle {}',map)
+                                Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
+                                //Note: ET >  TS TD > SS SD >  L > NR
+                                switch(data[i].tracks[j].nature)
+                                {
+                                    case 'NA':
+                                    case 'NR':
+                                        circle.color = intensity_colours[0]
+                                        break
+                                    case 'L':
+                                        circle.color = intensity_colours[1]
+                                        break
+                                    case 'SS':
+                                        circle.color = intensity_colours[2]
+                                        break
+                                    case 'SD':
+                                        circle.color = intensity_colours[3]
+                                        break
+                                    case 'TS':
+                                        circle.color = intensity_colours[4]
+                                        break
+                                    case 'TD':
+                                        circle.color = intensity_colours[5]
+                                        break
+                                    case 'ET':
+                                        circle.color = intensity_colours[6]
+                                        break
+                                }
+                                //
+                                circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
+                                circle.radius = 10000.0
+                                circle.border.width = 5
+                                map.addMapItem(circle)
+
+                                var point = []
+                                point.push(circle)
+                                point.push(data[i].tracks[j])
+                                map.points.push(point);
+
+
                             }
-                            //
-                            circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
-                            circle.radius = 10000.0
-                            circle.border.width = 5
-                            map.addMapItem(circle)
+                                Polyline.line.color = track_colours[i%track_colours.length]//'yellow'
+                                Polyline.line.width = 3
+                                map.addMapItem(Polyline)
                         }
-                            Polyline.line.color = track_colours[i%track_colours.length]//'yellow'
-                            Polyline.line.width = 3
-                            map.addMapItem(Polyline)
+                    }
+
+                }
+            }
+
+
+            function selectMapItem(p){
+                var select = map.fromCoordinate(p)
+                console.log(" p = " + map.fromCoordinate(p))
+
+                console.log(map.points)
+                for(var i = 0 ; i < map.points.length; i++){
+
+
+                    var point = map.fromCoordinate(map.points[i][0].center)
+                   // console.log(point.x)
+                    if(isNaN(parseFloat(point.x))){
+                       // console.log("nan " + point)
+                    }else{
+                        console.log(point)
+                        var l1 = Number(point.x)
+                        var l2 = Number(select.x)
+
+                        var l3 = l1 - l2
+                        //console.log(point[0])
+                       // console.log( l3 + " - " + (point[1] - select[1]) )
+                        if(  Math.abs(parseFloat(point.x) - parseFloat(select.x)) <=5 &&  Math.abs(parseFloat(point.x) - parseFloat(select.x)) <=5){
+
+                            var info = "TrackID : " + map.points[i][1].trackID + "\n"
+                            info += "Wind Speed : " + map.points[i][1].windSpeed + "\n"
+                            info += "Latitude : " + map.points[i][1].latitude + "\n"
+                            info += "Longitude : " + map.points[i][1].longitude + "\n"
+                            info += "Nature : " + map.points[i][1].nature + "\n"
+                            console.log("Wind Speed: " + map.points[i][1].windSpeed)
+                            console.log("Latitude: " + map.points[i][1].latitude)
+                            console.log("Longitude: " + map.points[i][1].longitude)
+                            console.log("Nature: " + map.points[i][1].nature)
+                            showInfo(info, select.x, select.y);
+
+
+
+                         //   detail.text = info;
+                         //   info.x = map.points[i][1].latitude;
+                         //   info.y = map.points[i][1].longitude;
+                            //detail.visible = true;
+                         //   info.visible = true;
+                        }
+
+
                     }
                 }
 
+
             }
-        }
+         }
+
+        MouseArea {
+                anchors.fill: parent
+
+                property bool mouseDown : false
+                property int lastX : -1
+                property int lastY : -1
+
+                onPressed : {
+
+                    mouseDown = true
+                    lastX = mouse.x
+                    lastY = mouse.y
+
+                    dragRect.x = lastX
+                    dragRect.y = lastY
+                }
+
+
+                onReleased : {
+                    mouseDown = false
+                    lastX = -1
+                    lastY = -1
+
+                    dragRect.x = 0
+                    dragRect.x = 0
+                    dragRect.height = 0
+                    dragRect.width = 0
+
+                    map.selectMapItem(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
+                }
+
+                onPositionChanged: {
+                    if (mouseDown) {
+                        var dx = mouse.x - lastX
+                        var dy = mouse.y - lastY
+                        map.pan(-dx, -dy)
+                        lastX = mouse.x
+                        lastY = mouse.y
+
+                         console.log("x " + dragRect.x + " y" + dragRect.y + " nX" + mouse.x + " nY" + mouse.y )
+                        dragRect.height = mouse.y - dragRect.y
+                        dragRect.width = mouse.x - dragRect.x
+
+                        console.log(dragRect.height)
+                        console.log(dragRect.width)
+
+
+                 }
+                }
+                onDoubleClicked: {
+                    map.center = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+                    if (map.zoomLevel < map.maximumZoomLevel)
+                        map.zoomLevel += 1
+                    console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
+                }
+            }
+
+
 
     }
+
 }
     Component {
             id: searchingView
@@ -244,5 +436,8 @@ Component {
         }
 
     Component.onCompleted: { stack.push(mapView); }
+
+
+
 
 }
