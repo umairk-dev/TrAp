@@ -9,8 +9,6 @@ import Cyclone 1.0
 import QtLocation 5.5
 import QtPositioning 5.3
 
-
-
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
     width: screenWidth
@@ -28,8 +26,7 @@ ApplicationWindow  {
     property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
                                         "XXXHDPI","XXXXHDPI"]
 
-    property var track_colours: ['yellow','green','red','pink','white','ruby']
-    property var intensity_colours: ['#ffffff','#3333ff','#006699','#009933','#cc9900','#cc0000','#cc00cc']
+    property var intensity_colours: ['#ffffff','#5ebaff','#00faf4','#ffff99','#ffe775','#ffc140','#ff8f20','#ff6060'] //28082016 Changed from #ffffcc to #ffff99
 
     readonly property int ppiRange:{
      if (ppi>=540)
@@ -46,12 +43,7 @@ ApplicationWindow  {
       0
      }
 
-
-
-
     /****************************************/
-
-
 
     MessageDialog {
         id: messageDialog
@@ -63,15 +55,10 @@ ApplicationWindow  {
     }
 
     //Info Box
-
     function showInfo(_data, x, y){
-
-
         messageDialog.text = _data;
-
         messageDialog.open();
     }
-
 
     /*****************************************/
 
@@ -86,8 +73,6 @@ ApplicationWindow  {
 
         stack.zoomIn();
     }
-
-
 
     function doSearch(type, content){
         window.isSearchScreen = false;
@@ -178,13 +163,6 @@ ApplicationWindow  {
         PluginParameter { name: "mapbox.map_id"; value: "mapbox.satellite" }
     }
 
-//    MapPolyline{
-//        id : lines
-//        line.width: 10
-//        line.color: 'yellow'
-
-//    }
-//mycentre
 Location{
     id: myCentre
     coordinate {
@@ -192,7 +170,6 @@ Location{
         longitude : 135.00
     }
 }
-
 
 Component {
     id: mapView
@@ -226,12 +203,7 @@ Component {
                     text: qsTr("OK")
                     onClicked: {infoBox.visible = false}
                 }
-
-
         }
-
-
-
 
         Map {
             id : map
@@ -243,7 +215,6 @@ Component {
             zoomLevel: 4
 
             property variant points : []
-
 
     //        activeMapType: supportedMapTypes[1]
 
@@ -257,64 +228,74 @@ Component {
                     // start drawing
                     for(var i=0;i<data.length;i++)
                     {
-    //                    var co = Qt.createComponent('polyLine.qml')
                         cycloneInfo.push(data[i])
                         // drawing track (if tracks are available)
                         if( data[i].tracks.length>0 )
                         {
-                            var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)
                             for(var j = 0; j < data[i].tracks.length;j++)
                             {
+                                var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)
                                 var circle = Qt.createQmlObject('import QtLocation 5.3; MapCircle {}',map)
                                 Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                                //Note: ET >  TS TD > SS SD >  L > NR
-                                switch(data[i].tracks[j].nature)
-                                {
-                                    case 'NA':
-                                    case 'NR':
+                                // 28082016  update to match the requirement
+                                if(data[i].tracks[j].windSpeed===-999)
                                         circle.color = intensity_colours[0]
-                                        break
-                                    case 'L':
+                                else if(data[i].tracks[j].windSpeed<34)
                                         circle.color = intensity_colours[1]
-                                        break
-                                    case 'SS':
+                                else if(data[i].tracks[j].windSpeed<64)
                                         circle.color = intensity_colours[2]
-                                        break
-                                    case 'SD':
+                                else if(data[i].tracks[j].windSpeed<83)
                                         circle.color = intensity_colours[3]
-                                        break
-                                    case 'TS':
+                                else if(data[i].tracks[j].windSpeed<96)
                                         circle.color = intensity_colours[4]
-                                        break
-                                    case 'TD':
+                                else if(data[i].tracks[j].windSpeed<113)
                                         circle.color = intensity_colours[5]
-                                        break
-                                    case 'ET':
+                                else if(data[i].tracks[j].windSpeed<137)
                                         circle.color = intensity_colours[6]
-                                        break
-                                }
+                                else
+                                        circle.color = intensity_colours[7]
                                 //
                                 circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
                                 circle.radius = 10000.0
-                                circle.border.width = 5
+                                circle.border.width = 2
+                                //
                                 map.addMapItem(circle)
 
                                 var point = []
                                 point.push(circle)
                                 point.push(data[i].tracks[j])
-                                map.points.push(point);
+                                map.points.push(point)
+                                // // 28082016  update to match the requirement Line function
+                                if(j>0)
+                                {
+                                    Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j-1].latitude,data[i].tracks[j-1].longitude))
+                                    Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
+                                    //
+                                    if(data[i].tracks[j-1].windSpeed===-999)
+                                            Polyline.line.color = intensity_colours[0]
+                                    else if(data[i].tracks[j-1].windSpeed<34)
+                                            Polyline.line.color = intensity_colours[1]
+                                    else if(data[i].tracks[j-1].windSpeed<64)
+                                            Polyline.line.color = intensity_colours[2]
+                                    else if(data[i].tracks[j-1].windSpeed<83)
+                                           Polyline.line.color = intensity_colours[3]
+                                    else if(data[i].tracks[j-1].windSpeed<96)
+                                           Polyline.line.color = intensity_colours[4]
+                                    else if(data[i].tracks[j-1].windSpeed<113)
+                                            Polyline.line.color = intensity_colours[5]
+                                    else if(data[i].tracks[j-1].windSpeed<137)
+                                            Polyline.line.color = intensity_colours[6]
+                                    else
+                                            Polyline.line.color = intensity_colours[7]
 
-
+                                    Polyline.line.width = 3
+                                    map.addMapItem(Polyline)
+                                }
                             }
-                                Polyline.line.color = track_colours[i%track_colours.length]//'yellow'
-                                Polyline.line.width = 3
-                                map.addMapItem(Polyline)
                         }
                     }
-
                 }
             }
-
 
             function selectMapItem(p){
                 var select = map.fromCoordinate(p)
@@ -322,7 +303,6 @@ Component {
 
                 console.log(map.points)
                 for(var i = 0 ; i < map.points.length; i++){
-
 
                     var point = map.fromCoordinate(map.points[i][0].center)
                    // console.log(point.x)
@@ -349,20 +329,14 @@ Component {
                             console.log("Nature: " + map.points[i][1].nature)
                             showInfo(info, select.x, select.y);
 
-
-
                          //   detail.text = info;
                          //   info.x = map.points[i][1].latitude;
                          //   info.y = map.points[i][1].longitude;
                             //detail.visible = true;
                          //   info.visible = true;
                         }
-
-
                     }
                 }
-
-
             }
          }
 
@@ -382,7 +356,6 @@ Component {
                     dragRect.x = lastX
                     dragRect.y = lastY
                 }
-
 
                 onReleased : {
                     mouseDown = false
@@ -422,9 +395,6 @@ Component {
                     console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
                 }
             }
-
-
-
     }
 
 }
@@ -436,8 +406,4 @@ Component {
         }
 
     Component.onCompleted: { stack.push(mapView); }
-
-
-
-
 }
