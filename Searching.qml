@@ -7,15 +7,15 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: rview
-    color : "transparent"
+    color : if(window._platform === "1"){"#ffff99"}
+            else{"transparent"}
     ColumnLayout {
         id: columnLayout1
         spacing : 20
         Label {
             id: labelTitle
-            color : if(window._platform === "1"){"black"
-                    rview.color="#ffff99"
-                    }
+            color : if(window._platform === "1")
+                    {"black"}
                     else
                     {"white"}
             text: qsTr("Search options")

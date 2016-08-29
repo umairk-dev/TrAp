@@ -338,6 +338,7 @@ Component {
                     }
                 }
             }
+
          }
 
         MouseArea {
@@ -395,6 +396,28 @@ Component {
                     console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
                 }
             }
+        /*29082016 [S] add zoom in/out button*/
+
+
+        Button {
+            id: buttonZoomout
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            text: qsTr("-")
+            onClicked: {
+                map.zoomLevel=map.zoomLevel-0.2
+            }
+        }
+        Button {
+            id: buttonZoomin
+            anchors.left: buttonZoomout.left +10
+            anchors.bottom: buttonZoomout.top
+            text: qsTr("+")
+            onClicked: {
+                    map.zoomLevel=map.zoomLevel+0.2
+            }
+        }
+        /*29082016 [E] add zoom in/out button*/
     }
 
 }
