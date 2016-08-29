@@ -5,24 +5,20 @@ import QtQuick.Window 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
 
-Rectangle {    
+Rectangle {
+    id: rview
     color : "transparent"
     ColumnLayout {
         id: columnLayout1
         spacing : 20
         Label {
             id: labelTitle
-            color : if(window._platform === "1"){"black"}
+            color : if(window._platform === "1"){"black"
+                    rview.color="#ffff99"
+                    }
                     else
                     {"white"}
             text: qsTr("Search options")
-            Layout.topMargin: 10
-            Layout.leftMargin: 10
-        }
-
-        Label {
-            id: labelHintMsg
-            color : "white"
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
@@ -114,6 +110,24 @@ Rectangle {
 
                 stack.pop()
             }
+            Layout.topMargin: 10
+            Layout.leftMargin: 10
+        }
+        /*29082016 [S] Search signal*/
+        Button {
+            id: buttonCancel
+            text: qsTr("Cancel")
+            onClicked: {
+                window.isSearchScreen = false;
+                                stack.pop()
+            }
+            Layout.topMargin: 10
+            Layout.leftMargin: 10
+        }
+        /*29082016 [E] Search signal*/
+        Label {
+            id: labelHintMsg
+            color : "white"
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
