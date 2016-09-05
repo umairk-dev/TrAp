@@ -16,7 +16,7 @@ ApplicationWindow  {
     color: "#4355e6"
     visible: true
     id : window
-
+    property bool isSearching: false
     property string info : ""
     property string _platform: platform
     property string mapUrl: initialUrl
@@ -45,8 +45,10 @@ ApplicationWindow  {
 
     /****************************************/
 
+
     MessageDialog {
         id: messageDialog
+
         title: "Cyclone Info"
         onAccepted: {
             messageDialog.close()
@@ -54,10 +56,45 @@ ApplicationWindow  {
         Component.onCompleted: visible = false
     }
 
+    Rectangle{
+         x :  parent.width/2
+         y : parent.height/2
+         width: 100
+         height : 100
+         color: "black"
+         id : processing
+         z : 0
+         Text {
+             anchors.centerIn: processing
+             id: txtProcess
+             text: qsTr("Processing..")
+             color : "white"
+         }
+
+    }
+
+
+
     //Info Box
-    function showInfo(_data, x, y){
+    function showTrackInfo(_data){
+     //   console.log(_data)
+
         messageDialog.text = _data;
         messageDialog.open();
+    }
+
+
+    function getCycloneByID(_id){
+        console.log("cycloneID = " +  _id);
+        console.log("cycloneInfo length = " + cycloneInfo.length);
+
+        for(var i = 0; i < cycloneInfo.length; i++){
+            if(cycloneInfo[i].cycloneID === _id){
+                console.log()
+                return cycloneInfo[i];
+            }
+        }
+        return null;
     }
 
     /*****************************************/
@@ -65,7 +102,10 @@ ApplicationWindow  {
     //signals
     signal submitTextField(string text)
     signal searchByName(string text)//18082016
-  //  signal sendWebView(WebEngineView view)
+    signal searchByYear(string text)
+    signal searchByArea(string lat, string lng, string radius)
+    signal controlMapMouse(bool status);
+    //  signal sendWebView(WebEngineView view)
 
     // slots
     function setTextField(text){
@@ -76,18 +116,19 @@ ApplicationWindow  {
 
     function doSearch(type, content){
         window.isSearchScreen = false;
+            console.log("Search: " + type + " "+ content)
         if(type === "name")
         {
             searchByName(content);
         }else if(type === "year" ){
-
+            searchByYear(content);
         }else if(type === "country" ){
 
         }
 
       //  window.newWidth = screenWidth
       //  window.newHeight = screenHeight
-        console.log("Search: " + content)
+
     }
 
 
@@ -107,6 +148,11 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
+                CheckBox{
+                    id : cbSelectArea
+                    text : "Select Area"
+                    onCheckedChanged: {controlMapMouse(cbSelectArea.checked)}
+                }
                 Item { Layout.fillWidth: true }
                 ToolButton {
 
@@ -141,17 +187,13 @@ ApplicationWindow  {
           objectName: "stack"
           delegate: StackViewDelegate {
                  function transitionFinished(properties){
-
                      if(window._platform === "2"){
                         properties.exitItem.visible = true
                      }
                  }
              }
 
-
-          function zoomIn(){
-
-              mapView.webView.zoomIn();
+          function enableMouse(){
 
           }
     }
@@ -174,18 +216,29 @@ Location{
 Component {
     id: mapView
 
+
     Item{
+        id : item
+        objectName: "item"
         anchors.fill: parent
 
+
+        function enableMouse(){
+            map.enableMouse();
+        }
         Rectangle{
-            color: "red"
+            color: "transparent"
+            border.color: "red"
             x : 0
             y : 0
             width: 0
             height: 0
             z : 55
             id : dragRect
+            radius: width*0.5
         }
+
+
             Rectangle{
                 z: 55
                 id: infoBox
@@ -211,17 +264,42 @@ Component {
             anchors.fill: parent
             plugin: mapProvider
             gesture.enabled: true
+            enabled: true
             center : myCentre.coordinate //22082016
             zoomLevel: 4
 
             property variant points : []
 
+
+            function enableMouse(){
+                mapMouseArea.enabled = true;
+            }
+
+
+            function disableMouse(){
+                mapMouseArea.enabled = false;
+            }
+
     //        activeMapType: supportedMapTypes[1]
 
             //1. each cyclone track woule be the same color
             //2. the point of cyclone use different color show the intensity
+
             function searchResult(data){
                 //ToDo: clear function
+               // console.log(" data len = " + data.length)
+
+                cbSelectArea.checked = false;
+                window.isSearching = false;
+                processing.z = 0
+
+                for(var i = 0; i< cycloneInfo.length;i++)
+                    cycloneInfo.pop();
+
+                map.clearMapItems();
+
+                for(var i = 0; i< cycloneInfo.length;i++)
+                    map.points.pop();
 
                 //start drawing
                 if(data.length > 0){
@@ -234,8 +312,10 @@ Component {
                         {
                             for(var j = 0; j < data[i].tracks.length;j++)
                             {
+                               // console.log(data[i].tracks[j].latitude + " " + data[i].tracks[j].longitude);
                                 var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)
-                                var circle = Qt.createQmlObject('import QtLocation 5.3; MapCircle {}',map)
+                                var circle = Qt.createQmlObject('MapCircleCustom {}',map)
+
                                 Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
                                 // 28082016  update to match the requirement
                                 if(data[i].tracks[j].windSpeed===-999)
@@ -256,27 +336,24 @@ Component {
                                         circle.color = intensity_colours[7]
                                 //
                                 circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
-                                circle.radius = 10000.0
-                                circle.border.width = 2
+                                circle.track = data[i].tracks[j]
                                 //
                                 map.addMapItem(circle)
 
-                                var point = []
-                                point.push(circle)
-                                point.push(data[i].tracks[j])
-                                map.points.push(point)
                                 // // 28082016  update to match the requirement Line function
                                 if(j>0)
                                 {
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j-1].latitude,data[i].tracks[j-1].longitude))
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
                                     //
+
                                     if(data[i].tracks[j-1].windSpeed===-999)
                                             Polyline.line.color = intensity_colours[0]
                                     else if(data[i].tracks[j-1].windSpeed<34)
                                             Polyline.line.color = intensity_colours[1]
                                     else if(data[i].tracks[j-1].windSpeed<64)
                                             Polyline.line.color = intensity_colours[2]
+
                                     else if(data[i].tracks[j-1].windSpeed<83)
                                            Polyline.line.color = intensity_colours[3]
                                     else if(data[i].tracks[j-1].windSpeed<96)
@@ -294,98 +371,97 @@ Component {
                             }
                         }
                     }
-                }
-            }
 
-            function selectMapItem(p){
-                var select = map.fromCoordinate(p)
-                console.log(" p = " + map.fromCoordinate(p))
 
-                console.log(map.points)
-                for(var i = 0 ; i < map.points.length; i++){
-
-                    var point = map.fromCoordinate(map.points[i][0].center)
-                   // console.log(point.x)
-                    if(isNaN(parseFloat(point.x))){
-                       // console.log("nan " + point)
-                    }else{
-                        console.log(point)
-                        var l1 = Number(point.x)
-                        var l2 = Number(select.x)
-
-                        var l3 = l1 - l2
-                        //console.log(point[0])
-                       // console.log( l3 + " - " + (point[1] - select[1]) )
-                        if(  Math.abs(parseFloat(point.x) - parseFloat(select.x)) <=5 &&  Math.abs(parseFloat(point.x) - parseFloat(select.x)) <=5){
-
-                            var info = "TrackID : " + map.points[i][1].trackID + "\n"
-                            info += "Wind Speed : " + map.points[i][1].windSpeed + "\n"
-                            info += "Latitude : " + map.points[i][1].latitude + "\n"
-                            info += "Longitude : " + map.points[i][1].longitude + "\n"
-                            info += "Nature : " + map.points[i][1].nature + "\n"
-                            console.log("Wind Speed: " + map.points[i][1].windSpeed)
-                            console.log("Latitude: " + map.points[i][1].latitude)
-                            console.log("Longitude: " + map.points[i][1].longitude)
-                            console.log("Nature: " + map.points[i][1].nature)
-                            showInfo(info, select.x, select.y);
-
-                         //   detail.text = info;
-                         //   info.x = map.points[i][1].latitude;
-                         //   info.y = map.points[i][1].longitude;
-                            //detail.visible = true;
-                         //   info.visible = true;
-                        }
-                    }
                 }
             }
 
          }
 
         MouseArea {
+                id : mapMouseArea
                 anchors.fill: parent
-
+                enabled: false
                 property bool mouseDown : false
                 property int lastX : -1
                 property int lastY : -1
+
+                onWheel: {
+                   if(wheel.angleDelta.y > 0){
+                       if (map.zoomLevel < map.maximumZoomLevel)
+                           map.zoomLevel += 1
+                   }else{
+                       if (map.zoomLevel > map.minimumZoomLevel)
+                           map.zoomLevel -= 1
+                   }
+
+                }
 
                 onPressed : {
 
                     mouseDown = true
                     lastX = mouse.x
                     lastY = mouse.y
-
                     dragRect.x = lastX
                     dragRect.y = lastY
                 }
 
                 onReleased : {
+
                     mouseDown = false
                     lastX = -1
                     lastY = -1
 
-                    dragRect.x = 0
-                    dragRect.x = 0
-                    dragRect.height = 0
-                    dragRect.width = 0
+                    if(cbSelectArea.checked === true && window.isSearching === false){
 
-                    map.selectMapItem(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
+                        var startPoint = map.toCoordinate(Qt.point(dragRect.x, dragRect.y))
+                        var endPoint = map.toCoordinate( Qt.point((dragRect.x + dragRect.width) , (dragRect.y + dragRect.height)))
+                        var radius = (startPoint.distanceTo(endPoint)/1000)/2;
+                        radius += "";
+                        var lat = startPoint.latitude+"";
+                        var lng = startPoint.longitude+"";
+                        if(radius > 200){
+                            processing.z = 60
+                            window.isSearching = true;
+                            searchByArea(lat, lng, radius )
+                        }
+                        dragRect.x = 0
+                        dragRect.y = 0
+                        dragRect.height = 0
+                        dragRect.width = 0
+                    }
+
+
+                    if( map.points.length > 0 ){//&& lastCheck == false){
+                        var _points = []
+
+                        for(var i = 0 ; i < map.points.length; i++){
+                            if(isNaN(map.fromCoordinate(map.points[i][0].center).x) === false){
+                                var point = []
+                                point.push(map.fromCoordinate(map.points[i][0].center))
+                                point.push(map.points[i][1])
+                                _points.push(point)
+                            }
+                        }
+
+                       // console.log(_points.length)
+                        Utils.selectMapItem(Qt.point(mouse.x, mouse.y), _points)
+                        lastCheck = true
+                    }
                 }
 
                 onPositionChanged: {
                     if (mouseDown) {
                         var dx = mouse.x - lastX
                         var dy = mouse.y - lastY
-                        map.pan(-dx, -dy)
                         lastX = mouse.x
                         lastY = mouse.y
-
-                         console.log("x " + dragRect.x + " y" + dragRect.y + " nX" + mouse.x + " nY" + mouse.y )
-                        dragRect.height = mouse.y - dragRect.y
-                        dragRect.width = mouse.x - dragRect.x
-
-                        console.log(dragRect.height)
-                        console.log(dragRect.width)
-
+                        if(cbSelectArea.checked === true){
+                            dragRect.height = mouse.x - dragRect.x//mouse.y - dragRect.y
+                            dragRect.width = mouse.x - dragRect.x
+                        }else{
+                            map.pan(-dx, -dy)
+                        }
 
                  }
                 }
@@ -396,7 +472,7 @@ Component {
                     console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
                 }
             }
-        /*29082016 [S] add zoom in/out button*/
+       /*29082016 [S] add zoom in/out button*/
 
 
         Button {

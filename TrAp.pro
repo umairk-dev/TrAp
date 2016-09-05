@@ -6,7 +6,8 @@ CONFIG += c++11
 SOURCES += main.cpp \
     controls.cpp \
     cyclonetrack.cpp \
-    cyclone.cpp
+    cyclone.cpp \
+    utils.cpp
 
 RESOURCES += qml.qrc
 
@@ -38,4 +39,5 @@ ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 HEADERS += \
     controls.h \
     cyclonetrack.h \
-    cyclone.h
+    cyclone.h \
+    utils.h

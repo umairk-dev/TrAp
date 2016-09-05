@@ -10,6 +10,8 @@
 #include <QScreen>
 #include "controls.h"
 #include "cyclone.h"
+#include "utils.h"
+
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
 #else
@@ -18,11 +20,14 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-     qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
+    qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
+
     QtWebView::initialize();
     Controls control;
+    Utils utils;
+
    // qmlRegisterType(Cyclone);
-QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 21082016
+    QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 21082016
     QScreen * screen = app.primaryScreen();
     int width = screen->availableSize().width();
     int height = screen->availableSize().height();
@@ -52,6 +57,7 @@ QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 2108201
     #endif
 
     context->setContextProperty("Controls", &control);
+    context->setContextProperty("Utils", &utils);
     context->setContextProperty(QStringLiteral("screenWidth"),
                             width);
     context->setContextProperty(QStringLiteral("screenHeight"),
@@ -72,10 +78,26 @@ QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 2108201
     QObject::connect(window, SIGNAL(submitTextField(QString)),
     &control, SLOT(handleSubmitTextField(QString)));
 
-    //search signal
-    QObject::connect(window, SIGNAL(searchByName(QString)),
-    &control, SLOT(searchCyclone(QString)));
 
+
+    //search signal  - by Name
+    QObject::connect(window, SIGNAL(searchByName(QString)),
+    &control, SLOT(searchCycloneByName(QString)));
+
+
+    //search signal  - by Year
+    QObject::connect(window, SIGNAL(searchByYear(QString)),
+    &control, SLOT(searchCycloneByYear(QString)));
+
+
+    //search signal  - by Area
+    QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString)),
+    &control, SLOT(searchCycloneByArea(QString,QString,QString)));
+
+
+    //search signal  - EnableDisable Map Mouse
+    QObject::connect(window, SIGNAL(controlMapMouse(bool)),
+    &control, SLOT(controlMapMouse(bool)));
 
 
     //search signal
@@ -87,6 +109,12 @@ QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 2108201
     //connect c++ to qml for sending data
     QObject::connect(&control, SIGNAL(setTextField(QVariant)),
     window, SLOT(setTextField(QVariant)));
+
+
+    //show track info
+  //  QObject::connect(&utils, SIGNAL(showTrackInfo(QVariant, QVariant, QVariant)),
+   // window, SLOT(showTrackInfo(QVariant, QVariant, QVariant)));
+
 
     QObject *webView = engine.rootObjects().at(0)->findChild<QObject*>("map");
     if(webView)

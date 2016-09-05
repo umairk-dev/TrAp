@@ -22,10 +22,19 @@ signals:
 
 private:
      QQmlApplicationEngine* _engine;
-public slots:
-      void handleSubmitTextField(const QString& in);
-      void searchCyclone(const QString& name);
-      void searchCycloneServiceFinished(QNetworkReply* reply);
+
+public
+
+
+     slots:
+
+     void controlMapMouse(const bool& status);
+     void handleSubmitTextField(const QString& in);
+     void searchCycloneByName(const QString& name);
+     void searchCycloneByYear(const QString& year);
+     void searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius);
+     void searchCycloneServiceFinished(QNetworkReply* reply);
+
       //void getWebView(QWebEngineView * view);
 
 };

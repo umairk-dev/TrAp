@@ -12,5 +12,8 @@
         <file>images/MDPI/search.png</file>
         <file>images/XXHDPI/search.png</file>
         <file>images/XXXHDPI/search.png</file>
+        <file>MapCircleCustom.qml</file>
+        <file>images/HDPI/search.png</file>
+        <file>images/HDPI/setting.png</file>
     </qresource>
 </RCC>

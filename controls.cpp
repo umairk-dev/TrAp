@@ -15,9 +15,6 @@ void Controls::onHello(){
 
 }
 
-
-
-
 void Controls::setEngine(QQmlApplicationEngine * engine){
     _engine = engine;
 }
@@ -30,19 +27,59 @@ void Controls::handleSubmitTextField(const QString &in)
 }
 
 
-void Controls::searchCyclone(const QString &name)
+void Controls::searchCycloneByName(const QString &name)
 {
 
        QNetworkAccessManager * nam = new QNetworkAccessManager(this);
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
 
-       QUrl url("http://smarttechsoft.com/test.php?name=" + name );
+       QUrl url("http://smarttechsoft.com/trap/index.php?type=cname&name=" + name );
        QNetworkReply* reply = nam->get(QNetworkRequest(url));
 
       // emit setTextField(in.toUpper());
 }
 
+
+void Controls::searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius)
+{
+
+       QNetworkAccessManager * nam = new QNetworkAccessManager(this);
+       QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
+
+       QUrl url("http://smarttechsoft.com/trap/index.php?type=area&lat=" + lat +"&lng=" + lng + "&radius=" + radius);
+       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+
+      // emit setTextField(in.toUpper());
+}
+
+
+void Controls::searchCycloneByYear(const QString &year)
+{
+
+       QNetworkAccessManager * nam = new QNetworkAccessManager(this);
+       QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
+       QUrl url("http://smarttechsoft.com/trap/index.php?type=cyear&year=" + year );
+       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+}
+
+
+void Controls::controlMapMouse(const bool& status)
+{
+    QObject *map = _engine->rootObjects().at(0)->findChild<QObject*>("map");
+    if(map)
+    {
+        if(status == true){
+            if(!QMetaObject::invokeMethod(map, "enableMouse" ))
+                qDebug() << "Failed to invoke push";
+        }else{
+            if(!QMetaObject::invokeMethod(map, "disableMouse" ))
+                qDebug() << "Failed to invoke push";
+        }
+    }
+}
 
 void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 {
@@ -70,9 +107,9 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
                 QJsonObject obj = value.toObject();
                 Cyclone * cyclone = new Cyclone;
                 cyclone->setCycloneName(obj["cycloneName"].toString());
-                cyclone->setCycloneID(obj["cycloneId"].toString());
+                cyclone->setCycloneID(obj["cycloneID"].toString());
                 cyclone->setBasin(obj["basin"].toString());
-                cyclone->setSubBasin(obj["sub_basin"].toString());
+                cyclone->setSubBasin(obj["subBasin"].toString());
                 cyclone->setSeasonYear(obj["seasonYear"].toString());
            //     cyclone.setNum(obj["num"].toString());
 
@@ -81,21 +118,23 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
                 QVariantList cycloneTracks;
                 if(obj.keys().contains("tracks")){
 
+
+
                     QJsonArray tracksArray = obj["tracks"].toArray();
                     qDebug() << tracksArray.size();
                     foreach (const QJsonValue & valueT, tracksArray)
                     {
                         QJsonObject objT = valueT.toObject();
                         CycloneTrack * tracks = new CycloneTrack;
-                        tracks->setCycloneID(objT["cycloneId"].toString());
-                        tracks->setTrackID(objT["trackId"].toString());
-                        tracks->setLongitude(objT["longitude"].toString());
-                        tracks->setLatitude(objT["latitude"].toString());
-                        tracks->setPressure(objT["pressure"].toString());
-                        tracks->setWindSpeed(objT["windSpeed"].toString());
+                        tracks->setCycloneID(obj["cycloneID"].toString());
+                        tracks->setTrackID(objT["trackID"].toInt());
+                        tracks->setLongitude(objT["longitude"].toDouble());
+                        tracks->setLatitude(objT["latitude"].toDouble());
+                        tracks->setPressure(objT["pressure"].toDouble());
+                        tracks->setWindSpeed(objT["windSpeed"].toDouble());
                         tracks->setNature(objT["nature"].toString());
-                        tracks->setDateTime(objT["dateTime"].toString());
-
+                        //tracks->setDateTime(objT["dateTime"].toString());
+                       // tracks->increaseAccuracy();
                         QVariant varT;
                         varT.setValue(tracks);
                         cycloneTracks.append(varT);
@@ -110,23 +149,12 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
             }
         }
 
-        qDebug() << cyclones.size();
+      //  qDebug() << cyclones.size();
         QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
         if(webView)
         {
-
-
-              qDebug() << "found";
-          //    if(cyclones.size() > 0){
-                  if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
-                      qDebug() << "Failed to invoke push";
-          /*    }else{
-                 QString notFound = "Not Found";//
-
-                  if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(notFound))))
-                      qDebug() << "Failed to invoke push";
-            //  }*/
-
+            if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
+               qDebug() << "Failed to invoke push";
 
         }else{
             qDebug() << "notfound";
@@ -137,3 +165,10 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
     delete reply;
 }
+
+
+
+
+
+
+
