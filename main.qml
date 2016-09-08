@@ -505,4 +505,131 @@ Component {
         }
 
     Component.onCompleted: { stack.push(mapView); }
+
+    // [S] intensity info
+    Rectangle{
+                id: intensityinfo
+                visible: true
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 10
+                width: 30
+                height : 200
+                color: "transparent"
+                ColumnLayout{
+                    Rectangle{
+                        id:iR0
+                        anchors.top : parent.top
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[0]
+                        Text {
+                            id: intensity0
+                            text: qsTr("NA")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR1
+                        anchors.top: iR0.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[1]
+                        Text {
+                            id: intensity1
+                            text: qsTr("TD")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR2
+                        anchors.top :  iR1.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[2]
+                        Text {
+                            id: intensity2
+                            text: qsTr("TS")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR3
+                        anchors.top : iR2.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[3]
+                        Text {
+                            id: intensity3
+                            text: qsTr("H1")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR4
+                        anchors.top : iR3.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[4]
+                        Text {
+                            id: intensity4
+                            text: qsTr("H2")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR5
+                        anchors.top : iR4.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[5]
+                        Text {
+                            id: intensity5
+                            text: qsTr("H3")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR6
+                        anchors.top :iR5.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[6]
+                        Text {
+                            id: intensity6
+                            text: qsTr("H4")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                    Rectangle{
+                        id:iR7
+                        anchors.top :iR6.bottom
+                        anchors.left:  parent.left
+                        anchors.margins: 5
+                        width: 20
+                        height : 20
+                        color: intensity_colours[7]
+                        Text {
+                            id: intensity7
+                            text: qsTr("H5")
+                            font.pixelSize:  if(window._platform === "1"){12}
+                        }
+                    }
+                }
+            }
+            // [S] intensity info
 }
