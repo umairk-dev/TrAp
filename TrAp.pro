@@ -1,13 +1,14 @@
 TEMPLATE = app
 
-QT += qml quick webview widgets
+QT += qml quick webview widgets sql
 CONFIG += c++11
 
 SOURCES += main.cpp \
     controls.cpp \
     cyclonetrack.cpp \
     cyclone.cpp \
-    utils.cpp
+    utils.cpp \
+    dbmanager.cpp
 
 RESOURCES += qml.qrc
 
@@ -40,4 +41,5 @@ HEADERS += \
     controls.h \
     cyclonetrack.h \
     cyclone.h \
-    utils.h
+    utils.h \
+    dbmanager.h

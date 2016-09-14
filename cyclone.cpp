@@ -18,19 +18,20 @@ QString Cyclone::getCycloneID() const
     return cycloneID;
 }
 
-QString Cyclone::getBasin() const
-{
-    return basin;
-}
-
-QString Cyclone::getSubBasin() const
-{
-    return subBasin;
-}
 
 QString Cyclone::getSeasonYear() const
 {
     return seasonYear;
+}
+
+QString Cyclone::getNum() const
+{
+    return num;
+}
+
+QString Cyclone::getSource() const
+{
+    return source;
 }
 
 
@@ -55,17 +56,6 @@ void Cyclone::setCycloneID(const QString &n)
 }
 
 
-void Cyclone::setBasin(const QString &n)
-{
-    basin = n;
-}
-
-
-
-void Cyclone::setSubBasin(const QString &n)
-{
-    subBasin = n;
-}
 
 
 
@@ -73,6 +63,19 @@ void Cyclone::setSeasonYear(const QString &n)
 {
     seasonYear = n;
 }
+
+void Cyclone::setSource(const QString &n)
+{
+    source = n;
+}
+
+
+void Cyclone::setNum(const QString &n)
+{
+    num = n;
+}
+
+
 
 
 

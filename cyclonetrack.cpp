@@ -17,6 +17,16 @@ QString CycloneTrack::getCycloneID() const
     return cycloneID;
 }
 
+QString CycloneTrack::getBasin() const
+{
+    return basin;
+}
+
+QString CycloneTrack::getSubBasin() const
+{
+    return subBasin;
+}
+
 
 double CycloneTrack::getLongitude() const
 {
@@ -98,6 +108,20 @@ void CycloneTrack::setPressure(const double &n)
 {
     pressure = n;
 }
+
+
+void CycloneTrack::setBasin(const QString &n)
+{
+    basin = n;
+}
+
+
+
+void CycloneTrack::setSubBasin(const QString &n)
+{
+    subBasin = n;
+}
+
 
 
 void CycloneTrack::increaseAccuracy(){

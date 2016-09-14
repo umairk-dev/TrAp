@@ -15,5 +15,17 @@
         <file>MapCircleCustom.qml</file>
         <file>images/HDPI/search.png</file>
         <file>images/HDPI/setting.png</file>
+        <file>images/HDPI/clear.png</file>
+        <file>images/MDPI/clear.png</file>
+        <file>images/XHDPI/clear.png</file>
+        <file>images/XXHDPI/clear.png</file>
+        <file>images/XXXHDPI/clear.png</file>
+        <file>images/HDPI/report.png</file>
+        <file>images/MDPI/report.png</file>
+        <file>images/XHDPI/report.png</file>
+        <file>images/XXHDPI/report.png</file>
+        <file>images/XXXHDPI/report.png</file>
+        <file>GenerateReport.qml</file>
+        <file>MapPolylineCustom.qml</file>
     </qresource>
 </RCC>

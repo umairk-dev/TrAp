@@ -20,9 +20,12 @@ MapCircle {
                 //var info = "Cyclone Name : " + c.cycloneName + "\n"
                 var info = "TrackID : " + track.trackID + "\n"
                 info += "Wind Speed : " + track.windSpeed + "\n"
+                info += "Pressure : " + track.pressure + "\n"
                 info += "Latitude : " + track.latitude + "\n"
                 info += "Longitude : " + track.longitude + "\n"
-                info += "Nature : " + track.nature + "\n"
+                info += "Basin : " + track.basin + "\n"
+                info += "Sub Basin : " + track.subBasin + "\n"
+                //info += "Nature : " + track.nature + "\n"
                 console.log("Wind Speed: " + track.windSpeed)
                 console.log("Latitude: " + track.latitude)
                 console.log("Longitude: " + track.longitude)

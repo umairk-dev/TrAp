@@ -19,7 +19,6 @@ ApplicationWindow  {
     property bool isSearching: false
     property string info : ""
     property string _platform: platform
-    property string mapUrl: initialUrl
     property bool isSearchScreen: false
     property int ppi: Screen.pixelDensity*25.4
     property variant cycloneInfo: []
@@ -75,6 +74,39 @@ ApplicationWindow  {
 
 
 
+         Text {
+             x : 20
+             y : 20
+             z : 70
+             anchors.centerIn: infoBox
+             id: txtInfo
+             color : "white"
+         }
+
+
+
+
+    function getTrackColor(windSpeed){
+        if(windSpeed===-999)
+                return intensity_colours[0]
+        else if(windSpeed<34)
+                return intensity_colours[1]
+        else if(windSpeed<64)
+                return intensity_colours[2]
+
+        else if(windSpeed<83)
+               return intensity_colours[3]
+        else if(windSpeed<96)
+               return intensity_colours[4]
+        else if(windSpeed<113)
+                return intensity_colours[5]
+        else if(windSpeed<137)
+                return intensity_colours[6]
+        else
+                return intensity_colours[7]
+    }
+
+
     //Info Box
     function showTrackInfo(_data){
      //   console.log(_data)
@@ -101,10 +133,16 @@ ApplicationWindow  {
 
     //signals
     signal submitTextField(string text)
-    signal searchByName(string text)//18082016
-    signal searchByYear(string text)
+    signal searchByName(string name)
+    signal searchByYear(string year)
+    signal searchByWind(string windFrom, string windTo)
+    signal searchByYears(string yearFrom, string yearTo)
+    signal searchByPressure(string pressureFrom, string pressureTo)
     signal searchByArea(string lat, string lng, string radius)
     signal controlMapMouse(bool status);
+    signal clearMap();
+
+
     //  signal sendWebView(WebEngineView view)
 
     // slots
@@ -119,8 +157,10 @@ ApplicationWindow  {
             console.log("Search: " + type + " "+ content)
         if(type === "name")
         {
+            processing.z = 60
             searchByName(content);
         }else if(type === "year" ){
+            processing.z = 60
             searchByYear(content);
         }else if(type === "country" ){
 
@@ -148,11 +188,28 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
+
                 CheckBox{
                     id : cbSelectArea
                     text : "Select Area"
                     onCheckedChanged: {controlMapMouse(cbSelectArea.checked)}
                 }
+
+                ToolButton {
+                    id : btnClearMap
+                    iconSource: "./images/" + dir[ppiRange] +"/clear.png"
+                    visible: false
+                    onClicked: {clearMap()}
+                }
+
+
+                ToolButton {
+                    id : btnExportCSV
+                    iconSource: "./images/" + dir[ppiRange] +"/report.png"
+                    visible: false
+                    onClicked: {}
+                }
+
                 Item { Layout.fillWidth: true }
                 ToolButton {
 
@@ -271,6 +328,12 @@ Component {
             property variant points : []
 
 
+            function clearMap(){
+                map.clearMapItems();
+                map.points = [];
+
+            }
+
             function enableMouse(){
                 mapMouseArea.enabled = true;
             }
@@ -303,6 +366,9 @@ Component {
 
                 //start drawing
                 if(data.length > 0){
+                    btnClearMap.visible = true;
+
+
                     // start drawing
                     for(var i=0;i<data.length;i++)
                     {
@@ -310,34 +376,17 @@ Component {
                         // drawing track (if tracks are available)
                         if( data[i].tracks.length>0 )
                         {
+                            var lines = []
                             for(var j = 0; j < data[i].tracks.length;j++)
                             {
                                // console.log(data[i].tracks[j].latitude + " " + data[i].tracks[j].longitude);
-                                var Polyline = Qt.createQmlObject('import QtLocation 5.3; MapPolyline {}',map)
+                                var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
                                 var circle = Qt.createQmlObject('MapCircleCustom {}',map)
 
                                 Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                                // 28082016  update to match the requirement
-                                if(data[i].tracks[j].windSpeed===-999)
-                                        circle.color = intensity_colours[0]
-                                else if(data[i].tracks[j].windSpeed<34)
-                                        circle.color = intensity_colours[1]
-                                else if(data[i].tracks[j].windSpeed<64)
-                                        circle.color = intensity_colours[2]
-                                else if(data[i].tracks[j].windSpeed<83)
-                                        circle.color = intensity_colours[3]
-                                else if(data[i].tracks[j].windSpeed<96)
-                                        circle.color = intensity_colours[4]
-                                else if(data[i].tracks[j].windSpeed<113)
-                                        circle.color = intensity_colours[5]
-                                else if(data[i].tracks[j].windSpeed<137)
-                                        circle.color = intensity_colours[6]
-                                else
-                                        circle.color = intensity_colours[7]
-                                //
+                                circle.color = getTrackColor(data[i].tracks[j].windSpeed)
                                 circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
                                 circle.track = data[i].tracks[j]
-                                //
                                 map.addMapItem(circle)
 
                                 // // 28082016  update to match the requirement Line function
@@ -345,34 +394,33 @@ Component {
                                 {
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j-1].latitude,data[i].tracks[j-1].longitude))
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                                    //
-
-                                    if(data[i].tracks[j-1].windSpeed===-999)
-                                            Polyline.line.color = intensity_colours[0]
-                                    else if(data[i].tracks[j-1].windSpeed<34)
-                                            Polyline.line.color = intensity_colours[1]
-                                    else if(data[i].tracks[j-1].windSpeed<64)
-                                            Polyline.line.color = intensity_colours[2]
-
-                                    else if(data[i].tracks[j-1].windSpeed<83)
-                                           Polyline.line.color = intensity_colours[3]
-                                    else if(data[i].tracks[j-1].windSpeed<96)
-                                           Polyline.line.color = intensity_colours[4]
-                                    else if(data[i].tracks[j-1].windSpeed<113)
-                                            Polyline.line.color = intensity_colours[5]
-                                    else if(data[i].tracks[j-1].windSpeed<137)
-                                            Polyline.line.color = intensity_colours[6]
-                                    else
-                                            Polyline.line.color = intensity_colours[7]
-
+                                    Polyline.line.color = getTrackColor(data[i].tracks[j].windSpeed)
+                                    Polyline.color = getTrackColor(data[i].tracks[j].windSpeed)
                                     Polyline.line.width = 3
-                                    map.addMapItem(Polyline)
+                                    Polyline.btnReport = btnExportCSV
+                                    Polyline.platform = window._platform
+                                    Polyline.txtInfo = txtInfo
+                                    Polyline.track = data[i].tracks[j]
+                                    Polyline.cyclone = data[i]
+                                    lines.push(Polyline)
                                 }
+                            }
+
+                            for(var k = 0; k < lines.length;k++){
+                                lines[k].otherLines = lines
+
+                                map.addMapItem(lines[k])
                             }
                         }
                     }
 
 
+                }else{
+                    btnClearMap.visible = false;
+
+                    if(window._platform === "2"){
+                        btnExportCSV.visible = false
+                    }
                 }
             }
 
@@ -432,7 +480,7 @@ Component {
                     }
 
 
-                    if( map.points.length > 0 ){//&& lastCheck == false){
+                    /*if( map.points.length > 0 ){//&& lastCheck == false){
                         var _points = []
 
                         for(var i = 0 ; i < map.points.length; i++){
@@ -447,7 +495,7 @@ Component {
                        // console.log(_points.length)
                         Utils.selectMapItem(Qt.point(mouse.x, mouse.y), _points)
                         lastCheck = true
-                    }
+                    }*/
                 }
 
                 onPositionChanged: {

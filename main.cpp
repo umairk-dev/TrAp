@@ -11,6 +11,7 @@
 #include "controls.h"
 #include "cyclone.h"
 #include "utils.h"
+#include "dbmanager.h"
 
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
 
     QtWebView::initialize();
     Controls control;
+    DbManager db;
     Utils utils;
 
    // qmlRegisterType(Cyclone);
@@ -40,18 +42,19 @@ int main(int argc, char *argv[])
     QQmlContext *context = engine.rootContext();
     //For android*****************
     #ifdef  Q_OS_MOBILE
-    QString helpHTMLFile = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+   /* QString helpHTMLFile = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     helpHTMLFile.append(QDir::separator());
     helpHTMLFile.append("map.html");
     QFile(helpHTMLFile).remove();
     QFile(":/map.html").copy(helpHTMLFile);
     context->setContextProperty("initialUrl",
                                    "file:///"+helpHTMLFile);
+    */
     context->setContextProperty(QStringLiteral("platform"),
                            "1");
     #else
-        context->setContextProperty(QStringLiteral("initialUrl"),
-                                QUrl(QStringLiteral("qrc:/map.html")));
+   //     context->setContextProperty(QStringLiteral("initialUrl"),
+     //                           QUrl(QStringLiteral("qrc:/map.html")));
         context->setContextProperty(QStringLiteral("platform"),
                                 "2");
     #endif
@@ -89,15 +92,32 @@ int main(int argc, char *argv[])
     QObject::connect(window, SIGNAL(searchByYear(QString)),
     &control, SLOT(searchCycloneByYear(QString)));
 
+    //search signal  - by Years
+    QObject::connect(window, SIGNAL(searchByYears(QString,QString)),
+    &control, SLOT(searchCycloneByYears(QString,QString)));
+
+    //search signal  - by Wind
+    QObject::connect(window, SIGNAL(searchByWind(QString,QString)),
+    &control, SLOT(searchCycloneByWind(QString,QString)));
+
+    //search signal  - by Pressure
+    QObject::connect(window, SIGNAL(searchByPressure(QString,QString)),
+    &control, SLOT(searchCycloneByPressure(QString,QString)));
+
 
     //search signal  - by Area
     QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString)),
     &control, SLOT(searchCycloneByArea(QString,QString,QString)));
 
 
-    //search signal  - EnableDisable Map Mouse
+    //control signal  - EnableDisable Map Mouse
     QObject::connect(window, SIGNAL(controlMapMouse(bool)),
     &control, SLOT(controlMapMouse(bool)));
+
+
+    //control signal  - Clear Map
+    QObject::connect(window, SIGNAL(clearMap()),
+    &control, SLOT(clearMap()));
 
 
     //search signal
@@ -135,6 +155,8 @@ int main(int argc, char *argv[])
         qDebug() << "notfound";
 
     }
+
+
 
     return app.exec();
 }

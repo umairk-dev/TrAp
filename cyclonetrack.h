@@ -14,6 +14,8 @@ class CycloneTrack : public QObject
     Q_PROPERTY(QString dateTime READ getDateTime WRITE setDateTime)
     Q_PROPERTY(QString nature READ getNature WRITE setNature)
     Q_PROPERTY(QString cycloneID READ getCycloneID WRITE setCycloneID)
+    Q_PROPERTY(QString basin READ getBasin WRITE setBasin)
+    Q_PROPERTY(QString subBasin READ getSubBasin WRITE setSubBasin)
 
 public:
     CycloneTrack(QObject *parent = 0);
@@ -25,6 +27,8 @@ public:
     QString getDateTime() const;
     QString getCycloneID() const;
     QString getNature() const;
+    QString getBasin() const;
+    QString getSubBasin() const;
 
     void setTrackID(const int &);
     void setCycloneID(const QString &);
@@ -35,6 +39,9 @@ public:
     void setDateTime(const QString &);
     void setNature(const QString &);
     void increaseAccuracy();
+    void setBasin(const QString &);
+    void setSubBasin(const QString &);
+
 private:
         QString cycloneID;
         int trackID;
@@ -44,6 +51,8 @@ private:
         double windSpeed;
         QString dateTime;
         QString nature;
+        QString basin;
+        QString subBasin;
 
 
 signals:

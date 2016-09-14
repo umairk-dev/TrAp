@@ -27,11 +27,14 @@ public
 
 
      slots:
-
+     void clearMap();
      void controlMapMouse(const bool& status);
      void handleSubmitTextField(const QString& in);
      void searchCycloneByName(const QString& name);
      void searchCycloneByYear(const QString& year);
+     void searchCycloneByYears(const QString& yearFrom, const QString& yearTo);
+     void searchCycloneByWind(const QString& windFrom, const QString& windTo);
+     void searchCycloneByPressure(const QString& pressureFrom, const QString& pressureTo);
      void searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius);
      void searchCycloneServiceFinished(QNetworkReply* reply);
 
