@@ -24,7 +24,10 @@ ApplicationWindow  {
     property variant cycloneInfo: []
     property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
                                         "XXXHDPI","XXXXHDPI"]
-
+// 14092016 [S] new search mechanism
+    property variant searchType //year, wind
+    property variant searchPara //2016,
+// 14092016 [E] new search mechanism
     property var intensity_colours: ['#ffffff','#5ebaff','#00faf4','#ffff99','#ffe775','#ffc140','#ff8f20','#ff6060'] //28082016 Changed from #ffffcc to #ffff99
 
     readonly property int ppiRange:{
@@ -151,25 +154,57 @@ ApplicationWindow  {
 
         stack.zoomIn();
     }
-
-    function doSearch(type, content){
-        window.isSearchScreen = false;
-            console.log("Search: " + type + " "+ content)
-        if(type === "name")
-        {
-            processing.z = 60
-            searchByName(content);
-        }else if(type === "year" ){
-            processing.z = 60
-            searchByYear(content);
-        }else if(type === "country" ){
-
-        }
-
-      //  window.newWidth = screenWidth
-      //  window.newHeight = screenHeight
-
+    // 14092016 [S] new search mechanism
+    function doClearCondition(){
+        searchType = []
+        searchPara = []
     }
+    //
+    function addSearchCondtion(type,content){
+        searchType.push(type)
+        searchPara.push(content)
+    }
+    function doSearch(){
+      window.isSearchScreen = false;
+      if(searchType.length === 1)
+      {//single type search
+//            console.log("[DBG] Type:"+searchType.length+"||"+searchType[searchType.length-1]+"\tPara"+searchPara.length+"||"+searchPara[searchPara.length-1])
+           if(searchType[searchType.length-1] === "year")
+           {
+               if(searchPara.length === 1)
+               {
+                    processing.z = 60
+                    searchByYear(searchPara[searchPara.length-1])
+               }
+               else
+               {}//searchByYearRange(searchPara[searchPara.length-1]);
+           }
+           else if(searchType[searchType.length-1] === "wind" ){
+               var para= String(searchPara[searchType.length-1]).split(',')
+               console.log("[DBG]p1"+para[0]+"\tp2"+para[1])
+               processing.z = 60
+               searchByWind(para[0],para[1])
+           }
+      }
+         else
+        {//multi type search
+        }
+    }
+    // 14092016 [E] new search mechanism
+//    function doSearch(type, content){//old
+//        window.isSearchScreen = false;
+//            console.log("Search: " + type + " "+ content)
+//        if(type === "name")
+//        {
+//            processing.z = 60
+//            searchByName(content);
+//        }else if(type === "year" ){
+//            processing.z = 60
+//            searchByYear(content);
+//        }else if(type === "country" ){
+
+//        }
+//    }
 
 
     Menu {
