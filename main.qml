@@ -381,14 +381,29 @@ Component {
                             {
                                // console.log(data[i].tracks[j].latitude + " " + data[i].tracks[j].longitude);
                                 var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
-                                var circle = Qt.createQmlObject('MapCircleCustom {}',map)
-
                                 Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                                circle.color = getTrackColor(data[i].tracks[j].windSpeed)
-                                circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
-                                circle.track = data[i].tracks[j]
-                                map.addMapItem(circle)
+                                if(j==0 && data[i].tracks.length >1)
+                                {// 14092016 start point
+                                    var startpoint = Qt.createQmlObject('import QtLocation 5.3;import QtQuick 2.7;
+                                                                            MapQuickItem { id: cyclonemarker;
+                                                                            anchorPoint.x: image.width * 0.5;
+                                                                            anchorPoint.y: image.height * 0.5;
+                                                                            sourceItem: Image { id: image;
+                                                                            source: "./images/" + dir[ppiRange] +"/hurricane.png" }
+                                                                              }',map)
 
+                                    startpoint.coordinate = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
+                                    map.addMapItem(startpoint)
+                                }
+                                else
+                                {// 14092016 normal cycle
+                                    var circle = Qt.createQmlObject('MapCircleCustom {}',map)
+                                    circle.color = getTrackColor(data[i].tracks[j].windSpeed)
+                                    circle.center = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
+                                    circle.track = data[i].tracks[j]
+                                    map.addMapItem(circle)
+
+                                }
                                 // // 28082016  update to match the requirement Line function
                                 if(j>0)
                                 {
@@ -534,7 +549,7 @@ Component {
         }
         Button {
             id: buttonZoomin
-            anchors.left: buttonZoomout.left +10
+            anchors.left: buttonZoomout.left
             anchors.bottom: buttonZoomout.top
             text: qsTr("+")
             onClicked: {
@@ -577,6 +592,7 @@ Component {
                             id: intensity0
                             text: qsTr("NA")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                             else{0}
                         }
                     }
                     Rectangle{
@@ -591,6 +607,7 @@ Component {
                             id: intensity1
                             text: qsTr("TD")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                            else{0}
                         }
                     }
                     Rectangle{
@@ -605,6 +622,7 @@ Component {
                             id: intensity2
                             text: qsTr("TS")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                             else{0}
                         }
                     }
                     Rectangle{
@@ -619,6 +637,7 @@ Component {
                             id: intensity3
                             text: qsTr("H1")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                            else{0}
                         }
                     }
                     Rectangle{
@@ -633,6 +652,7 @@ Component {
                             id: intensity4
                             text: qsTr("H2")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                             else{0}
                         }
                     }
                     Rectangle{
@@ -647,6 +667,7 @@ Component {
                             id: intensity5
                             text: qsTr("H3")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                            else{0}
                         }
                     }
                     Rectangle{
@@ -661,6 +682,7 @@ Component {
                             id: intensity6
                             text: qsTr("H4")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                            else{0}
                         }
                     }
                     Rectangle{
@@ -675,6 +697,7 @@ Component {
                             id: intensity7
                             text: qsTr("H5")
                             font.pixelSize:  if(window._platform === "1"){12}
+                                            else{0}
                         }
                     }
                 }

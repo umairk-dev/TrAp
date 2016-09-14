@@ -27,5 +27,10 @@
         <file>images/XXXHDPI/report.png</file>
         <file>GenerateReport.qml</file>
         <file>MapPolylineCustom.qml</file>
+        <file>images/HDPI/hurricane.png</file>
+        <file>images/MDPI/hurricane.png</file>
+        <file>images/XHDPI/hurricane.png</file>
+        <file>images/XXHDPI/hurricane.png</file>
+        <file>images/XXXHDPI/hurricane.png</file>
     </qresource>
 </RCC>
