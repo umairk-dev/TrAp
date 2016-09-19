@@ -34,7 +34,12 @@ ApplicationWindow  {
     property variant searchPara //2016,
 // 14092016 [E] new search mechanism
     property var intensity_colours: ['#ffffff','#5ebaff','#00faf4','#ffff99','#ffe775','#ffc140','#ff8f20','#ff6060'] //28082016 Changed from #ffffcc to #ffff99
-
+    // 18092016 [S] predefine country search
+    property var preDefineCountry: ["-17.7134,178.0650","-9.6457,160.1562","-21.1790,-175.1982"]//FST
+    // 18092016 [E] predefine country search
+    // 19092016 [S] area selection
+    property bool areaSelectMode:false
+    // 19092016 [E] area selection
     readonly property int ppiRange:{
      if (ppi>=540)
       5
@@ -205,21 +210,42 @@ ApplicationWindow  {
       if(searchType.length === 1)
       {//single type search
 //            console.log("[DBG] Type:"+searchType.length+"||"+searchType[searchType.length-1]+"\tPara"+searchPara.length+"||"+searchPara[searchPara.length-1])
+          var singleSearchPara
            if(searchType[searchType.length-1] === "year")
            {
-               if(searchPara.length === 1)
+               if(searchPara.length === 1 && searchPara[searchPara.length-1].length ===4)
                {
                     processing.z = 60
                     searchByYear(searchPara[searchPara.length-1])
                }
                else
-               {}//searchByYearRange(searchPara[searchPara.length-1]);
+               {
+                   singleSearchPara = String(searchPara[searchType.length-1]).split(',')
+//                   console.log("[DBG]p1"+paraYear[0]+"\tp2"+paraYear[1])
+                   processing.z = 60
+                   searchByYears(singleSearchPara[0],singleSearchPara[1])
+               }//searchByYearRange(searchPara[searchPara.length-1]);
            }
            else if(searchType[searchType.length-1] === "wind" ){
-               var para= String(searchPara[searchType.length-1]).split(',')
-               console.log("[DBG]p1"+para[0]+"\tp2"+para[1])
+               singleSearchPara = String(searchPara[searchType.length-1]).split(',')
+//               console.log("[DBG]p1"+paraWind[0]+"\tp2"+paraWind[1])
                processing.z = 60
-               searchByWind(para[0],para[1])
+               searchByWind(singleSearchPara[0],singleSearchPara[1])
+           }
+           else if(searchType[searchType.length-1] === "pressure" ){
+               singleSearchPara = String(searchPara[searchType.length-1]).split(',')
+//               console.log("[DBG]p1"+singleSearchPara[0]+"\tp2"+singleSearchPara[1])
+               processing.z = 60
+               searchByPressure(singleSearchPara[0],singleSearchPara[1])
+           }
+           else if(searchType[searchType.length-1] === "country" ){
+           // 18092016 [E] predefine country search
+           //preDefineCountry
+               singleSearchPara = String(preDefineCountry[parseInt(searchPara[searchType.length-1])]).split(',')
+//               console.log("[DBGc]p1:"+singleSearchPara[0]+"\tp2:"+singleSearchPara[1]+"\t")
+               processing.z = 60
+               searchByArea(parseFloat(singleSearchPara[0]),parseFloat(singleSearchPara[1]),2.0)
+           // 18092016 [E] predefine country search
            }
       }
          else
@@ -227,20 +253,13 @@ ApplicationWindow  {
         }
     }
     // 14092016 [E] new search mechanism
-//    function doSearch(type, content){//old
-//        window.isSearchScreen = false;
-//            console.log("Search: " + type + " "+ content)
-//        if(type === "name")
-//        {
-//            processing.z = 60
-//            searchByName(content);
-//        }else if(type === "year" ){
-//            processing.z = 60
-//            searchByYear(content);
-//        }else if(type === "country" ){
-
-//        }
-//    }
+    // 19092016 [S] area selection
+    function areaSearchCheck(cbStatus)
+    {
+        controlMapMouse(cbStatus)
+        areaSelectMode=cbStatus
+    }
+    // 19092016 [E] area selection
 
 
     Menu {
@@ -260,11 +279,11 @@ ApplicationWindow  {
             RowLayout {
                 anchors.fill: parent
 
-                CheckBox{
-                    id : cbSelectArea
-                    text : "Select Area"
-                    onCheckedChanged: {controlMapMouse(cbSelectArea.checked)}
-                }
+//                CheckBox{ //old
+//                    id : cbSelectArea
+//                    text : "Select Area"
+//                    onCheckedChanged: {controlMapMouse(cbSelectArea.checked)}
+//                }
 
                 ToolButton {
                     id : btnClearMap
@@ -430,7 +449,7 @@ Component {
             }
 
             function searchError(){
-                cbSelectArea.checked = false;
+//                cbSelectArea.checked = false;
                 window.isSearching = false;
 
                 btnExportCSV.visible = false;
@@ -447,8 +466,10 @@ Component {
             function searchResult(data){
                 //ToDo: clear function
                // console.log(" data len = " + data.length)
-
-                cbSelectArea.checked = false;
+                //                cbSelectArea.checked = false;
+                // 19092016 [S] area selection
+                areaSelectMode  = false
+                // 19092016 [E] area selection
                 window.isSearching = false;
 
                 btnExportCSV.visible = false;
@@ -477,7 +498,7 @@ Component {
                     {
                         cycloneInfo.push(data[i])
                         // drawing track (if tracks are available)
-                        if( data[i].tracks.length>0 )
+                        if( data[i].tracks.length>0 || i<40)
                         {
                             var lines = []
                             for(var j = 0; j < data[i].tracks.length;j++)
@@ -512,7 +533,7 @@ Component {
                                     var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j-1].latitude,data[i].tracks[j-1].longitude))
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
-                                    console.log(data[i].tracks[j-1].latitude+","+data[i].tracks[j-1].longitude +" - "+ data[i].tracks[j].latitude+","+data[i].tracks[j].longitude)
+//                                    console.log(data[i].tracks[j-1].latitude+","+data[i].tracks[j-1].longitude +" - "+ data[i].tracks[j].latitude+","+data[i].tracks[j].longitude)
                                     Polyline.line.color = getTrackColor(data[i].tracks[j].windSpeed)
                                     Polyline.color = getTrackColor(data[i].tracks[j].windSpeed)
                                     Polyline.line.width = 3
@@ -578,8 +599,8 @@ Component {
                     lastX = -1
                     lastY = -1
 
-                    if(cbSelectArea.checked === true && window.isSearching === false){
-
+//                    if(cbSelectArea.checked === true && window.isSearching === false){ //old
+                        if(areaSelectMode && window.isSearching === false){
                         var startPoint = map.toCoordinate(Qt.point(dragRect.x, dragRect.y))
                         var endPoint = map.toCoordinate( Qt.point((dragRect.x + dragRect.width) , (dragRect.y + dragRect.height)))
                         var radius = (startPoint.distanceTo(endPoint)/1000)/2;
@@ -622,7 +643,8 @@ Component {
                         var dy = mouse.y - lastY
                         lastX = mouse.x
                         lastY = mouse.y
-                        if(cbSelectArea.checked === true){
+//                        if(cbSelectArea.checked === true){//old
+                        if(areaSelectMode === true){
                             dragRect.height = mouse.x - dragRect.x//mouse.y - dragRect.y
                             dragRect.width = mouse.x - dragRect.x
                         }else{
@@ -635,7 +657,7 @@ Component {
                     map.center = map.toCoordinate(Qt.point(mouse.x, mouse.y))
                     if (map.zoomLevel < map.maximumZoomLevel)
                         map.zoomLevel += 1
-                    console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
+//                    console.log(map.toCoordinate(Qt.point(mouse.x, mouse.y)))
                 }
             }
        /*29082016 [S] add zoom in/out button*/

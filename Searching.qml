@@ -8,6 +8,7 @@ import QtQuick.Controls 1.4
 
 Rectangle {
     property var serchingitem: ['year','wind','pressure','area','country']
+    property var countrylist: ["Fiji","Solomon","Tonga"]
     id: rview
     color : if(window._platform === "1"){"#ffff99"}
             else{"transparent"}
@@ -28,6 +29,7 @@ Rectangle {
                                 content= String(parseInt(rsYear.first.value))
                             else
                                 content= String(parseInt(rsYear.first.value)+","+parseInt(rsYear.second.value))
+
                             addSearchCondtion(type,content)//12092016 [S] Search signal
                         }
                         if(cbWind.checked){
@@ -38,9 +40,25 @@ Rectangle {
                                 content= String(parseInt(rsWind.first.value)+","+parseInt(rsWind.second.value))
                             addSearchCondtion(type,content)//12092016 [S] Search signal
                         }
-                        if(cbPressure .checked){
-//                            addSearchCondtion(type,content)//12092016 [S] Search signal
+                        // 19092016 [S] searching by pressure
+                        if(cbPressure.checked){
+                            type=serchingitem[2]
+                            content= String(parseInt(rsPressure.first.value)+","+parseInt(rsPressure.second.value))
+                            addSearchCondtion(type,content)//12092016 [S] Search signal
                         }
+                        // 19092016 [E] searching by pressure
+                        // 18092016 [S] predefine country search
+                        if(cbCountry.checked){
+                            type=serchingitem[4]
+                            content=String(comboBoxCountry.currentIndex)
+                            addSearchCondtion(type,content)
+                        }                        
+                        // 18092016 [E] predefine country search
+                        // 19092016 [S] area selection
+                        if(cbArea.checked){
+                            areaSearchCheck(cbArea.checked)
+                        }
+                        // 19092016 [E] area selection
                         /*18082016 [E] Search signal*/
                         doSearch()//12092016 [S] Search signal
 
@@ -78,22 +96,33 @@ Rectangle {
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
-
         //SelectArea
+        RowLayout{
+            visible: if(window._platform === "1"){false}
+                     else{true}
 
-        CheckBox{
-            id:cbArea
-            Layout.topMargin: 10
-            Layout.leftMargin: 10
-            style:
-                CheckBoxStyle{
-                 label: Text {
-                     id: txtAreaCB
-                        color: "white"
-                        text: "Area"
+            CheckBox{
+                id:cbArea
+                Layout.topMargin: 10
+                Layout.leftMargin: 10
+
+                style:
+                    CheckBoxStyle{
+                       label: Text {
+                            id: txtAreaCB
+                            color: "white"
+                            text: "Area"
+                        }
                     }
-                }
-//            onCheckedChanged:controlMapMouse(cbArea.checked)
+            onCheckedChanged:
+            {
+                if(cbArea.checked)
+                    cbCountry.checked=false
+
+                controlMapMouse(cbArea.checked)
+            }
+
+            }
         }
 
         //RsYear
@@ -210,18 +239,38 @@ Rectangle {
             second.value: 1000
             stepSize: 1.0
         }
+        // 18092016 [S] predefine country search
+        RowLayout{
+            CheckBox{
+                id:cbCountry
+                Layout.topMargin: 10
+                Layout.leftMargin: 10
 
-                ComboBox {
-                    id: comboBoxCountry
-
-                    model: ListModel {
-                        id: countryItems
-                        ListElement { text: "Fiji"}
-                        ListElement { text: "Solomon" }
-                        ListElement { text: "Tonga"}
+                style: CheckBoxStyle{
+                     label: Text {
+                         id: txtCountryCB
+                            color: if(window._platform === "1"){"black"}
+                                   else
+                                   {"white"}
+                            text: "Country"
+                        }
                     }
-                    Layout.topMargin: 10
-                    Layout.leftMargin: 10
+                onCheckedChanged:  {
+                if(cbCountry.checked)
+                    cbArea.checked=false
                 }
+            }
+            Item {
+                id: icomboBoxCountry
+                visible: cbCountry.checked
+//                Layout.topMargin: 10
+                Layout.leftMargin: 10
+                    ComboBox {
+                            id: comboBoxCountry
+                            model: countrylist
+                    }
+            }
+        }
+        // 18092016 [E] predefine country search
     }
 }
