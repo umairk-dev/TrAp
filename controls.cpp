@@ -3,6 +3,9 @@
 #include <QtQuick>
 #include <QDialog>
 #include <QObject>
+#include <qfile.h>
+
+
 #include "cyclone.h"
 #include "cyclonetrack.h"
 Controls::Controls(QObject  *parent) : QObject (parent)
@@ -127,6 +130,52 @@ void Controls::controlMapMouse(const bool& status)
 }
 
 
+void Controls::generateReport(const QString &path,const  QVariant &cyclones)
+{
+
+    QString fileName = path.mid(8,path.length());
+    if(fileName.mid(fileName.length()-4) != ".csv")
+        fileName.append(".csv");
+    QFile file( fileName ); // Write the text to a file
+    if ( file.open( QIODevice::WriteOnly ) )
+    {
+        QTextStream stream( &file );
+        QList<QVariant> list = cyclones.toList();
+        for(int i = 0; i < list.size(); i++){
+           Cyclone * c = qvariant_cast<Cyclone*>(list.at(i));
+           stream << "Serial Num"<<","<<"Cyclone Name" << "," << "Year"<<"\n";
+           stream << c->getNum()<<","<<c->getCycloneName()<<","<<c->getSeasonYear()<<"\n";
+           stream << "TrackID"<<","<<"Date/Time" << "," << "Latitude"<<"," << "Longitude"<<"," << "Wind Speed"<<"," << "Pressure"<<"," << "Basin"<<"," << "Sub Basin"<<"\n";
+           for(int j = 0; j < c->getTracks().size(); j++){
+               CycloneTrack * track = qvariant_cast<CycloneTrack*>(c->getTracks().at(j));
+               stream << track->getTrackID()  <<","<<track->getDateTime() << "," << track->getLatitude()<<"," << track->getLongitude()<<"," << track->getWindSpeed()<<"," << track->getPressure()<<"," << track->getBasin()<<"," << track->getSubBasin()<<"\n";
+           }
+           //qDebug() <<  c->getCycloneName();
+        }
+        QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
+        if(webView)
+        {
+           // qDebug() << "ERROR";
+            QString msg = "Report Generated Successfully..";
+            if(!QMetaObject::invokeMethod(webView, "reportGenerated",  Q_ARG(QVariant,QVariant::fromValue( msg))))
+               qDebug() << "Failed to invoke push";
+        }
+    }else{
+        QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
+        if(webView)
+        {
+           // qDebug() << "ERROR";
+            QString msg = "Error: Unable to create file";
+            if(!QMetaObject::invokeMethod(webView, "reportGenerated", Q_ARG(QVariant, QVariant::fromValue(msg))))
+               qDebug() << "Failed to invoke push";
+        }
+        qDebug() << "unable to open";
+
+    }
+
+
+}
+
 void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 {
     if(reply->error() == QNetworkReply::NoError) {
@@ -150,20 +199,25 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
             QJsonArray jsonArray = jsonObject["cyclones"].toArray();
             foreach (const QJsonValue & value, jsonArray)
             {
-                QJsonObject obj = value.toObject();
-                Cyclone * cyclone = new Cyclone;
-                cyclone->setCycloneName(obj["name"].toString());
-                cyclone->setCycloneID(obj["id"].toString());
-                cyclone->setSeasonYear(obj["year"].toString());
-                cyclone->setNum(obj["serial_num"].toString());
-                cyclone->setSource(obj["source"].toString());
 
+                QJsonObject obj = value.toObject();
+                QJsonObject objC = obj["cyclone"].toObject();
+                Cyclone * cyclone = new Cyclone;
+
+                QString id = QString::number(objC["id"].toInt());
+                cyclone->setCycloneName(objC["name"].toString());
+                cyclone->setCycloneID(id);
+                cyclone->setSeasonYear(objC["year"].toString());
+                cyclone->setNum(objC["serial_num"].toString());
+                cyclone->setSource(objC["source"].toString());
+
+//                qDebug()<<obj["cyclone"];
+
+                qDebug()<<objC["name"];
 
 
                 QVariantList cycloneTracks;
                 if(obj.keys().contains("tracks")){
-
-
 
                     QJsonArray tracksArray = obj["tracks"].toArray();
                     qDebug() << tracksArray.size();
@@ -210,15 +264,22 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
             if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
                qDebug() << "Failed to invoke push";
 
-        }else{
-            qDebug() << "notfound";
         }
     } else {
-        qDebug() << "ERROR";
+        QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
+        if(webView)
+        {
+            qDebug() << "ERROR";
+            if(!QMetaObject::invokeMethod(webView, "searchError"))
+               qDebug() << "Failed to invoke push";
+        }
     }
 
     delete reply;
 }
+
+
+
 
 
 

@@ -15,13 +15,18 @@ ApplicationWindow  {
     height : screenHeight
     color: "#4355e6"
     visible: true
+    visibility: "Maximized"
     id : window
     property bool isSearching: false
     property string info : ""
     property string _platform: platform
     property bool isSearchScreen: false
+    property bool isReportScreen: false
     property int ppi: Screen.pixelDensity*25.4
     property variant cycloneInfo: []
+
+    property variant selectedCyclones: []
+
     property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
                                         "XXXHDPI","XXXXHDPI"]
 // 14092016 [S] new search mechanism
@@ -81,7 +86,7 @@ ApplicationWindow  {
              x : 20
              y : 20
              z : 70
-             anchors.centerIn: infoBox
+
              id: txtInfo
              color : "white"
          }
@@ -96,7 +101,6 @@ ApplicationWindow  {
                 return intensity_colours[1]
         else if(windSpeed<64)
                 return intensity_colours[2]
-
         else if(windSpeed<83)
                return intensity_colours[3]
         else if(windSpeed<96)
@@ -119,18 +123,6 @@ ApplicationWindow  {
     }
 
 
-    function getCycloneByID(_id){
-        console.log("cycloneID = " +  _id);
-        console.log("cycloneInfo length = " + cycloneInfo.length);
-
-        for(var i = 0; i < cycloneInfo.length; i++){
-            if(cycloneInfo[i].cycloneID === _id){
-                console.log()
-                return cycloneInfo[i];
-            }
-        }
-        return null;
-    }
 
     /*****************************************/
 
@@ -142,11 +134,43 @@ ApplicationWindow  {
     signal searchByYears(string yearFrom, string yearTo)
     signal searchByPressure(string pressureFrom, string pressureTo)
     signal searchByArea(string lat, string lng, string radius)
+    signal generateReport(string path, variant cyclones)
     signal controlMapMouse(bool status);
     signal clearMap();
 
 
     //  signal sendWebView(WebEngineView view)
+
+    function selectCyclone(cyclone){
+        console.log("Adding: " + cyclone.cycloneID + ", " + cyclone.cycloneName);
+        console.log("List before adding : " + selectedCyclones);
+        for(var i = 0; i < selectedCyclones.length; i++){
+            if(selectedCyclones[i].cycloneID === cyclone.cycloneID){
+                console.log("Already in list");
+                return;
+            }
+        }
+
+        selectedCyclones.push(cyclone);
+
+        console.log("Added : length = " + selectedCyclones.length);
+        console.log("List after adding : " + selectedCyclones);
+
+    }
+
+    function removeCyclone(cyclone){
+        console.log("removing : " + cyclone.cycloneID);
+        console.log("List before rem : " + selectedCyclones);
+
+        var temp = []
+        for(var i = 0; i < selectedCyclones.length; i++){
+            if(selectedCyclones[i].cycloneID !== cyclone.cycloneID)
+                temp.push(selectedCyclones[i]);
+        }
+        selectedCyclones = temp;
+        console.log("List after rem : " + selectedCyclones);
+    }
+
 
     // slots
     function setTextField(text){
@@ -154,11 +178,23 @@ ApplicationWindow  {
 
         stack.zoomIn();
     }
+
+
+    function _generateReport(type, path){
+        if(type === "all"){
+            generateReport(path, cycloneInfo);
+        }else{
+            generateReport(path, selectedCyclones);
+        }
+    }
+
     // 14092016 [S] new search mechanism
     function doClearCondition(){
         searchType = []
         searchPara = []
     }
+
+
     //
     function addSearchCondtion(type,content){
         searchType.push(type)
@@ -242,18 +278,28 @@ ApplicationWindow  {
                     id : btnExportCSV
                     iconSource: "./images/" + dir[ppiRange] +"/report.png"
                     visible: false
-                    onClicked: {}
+                    onClicked:  if(window.isReportScreen === false){
+                                    if(window.isSearchScreen !== false){
+                                        window.isSearchScreen = false;
+                                        stack.pop();
+                                    }
+                                    window.isReportScreen = true;
+                                    stack.push(reportView);
+                                }
                 }
 
                 Item { Layout.fillWidth: true }
                 ToolButton {
 
                     iconSource: "./images/" + dir[ppiRange] +"/search.png"
-                    onClicked: if(window.isSearchScreen == false){
-                                   window.isSearchScreen = true;
-                                 //  window.newWidth = screenWidth - screenWidth*.5
-                                   //window.newHeight = screenHeight - screenHeight*.5
-                                   stack.push(searchingView);}
+                    onClicked: if(window.isSearchScreen === false){
+                                    if(window.isReportScreen !== false){
+                                        window.isReportScreen = false;
+                                        stack.pop();
+                                    }
+                                    window.isSearchScreen = true;
+                                    stack.push(searchingView);
+                                }
 
                 }
                 ToolButton {
@@ -366,7 +412,8 @@ Component {
             function clearMap(){
                 map.clearMapItems();
                 map.points = [];
-
+                btnExportCSV.visible = false;
+                txtInfo.text = "";
             }
 
             function enableMouse(){
@@ -376,6 +423,20 @@ Component {
 
             function disableMouse(){
                 mapMouseArea.enabled = false;
+            }
+
+            function reportGenerated(msg){
+                txtInfo.text = msg;
+            }
+
+            function searchError(){
+                cbSelectArea.checked = false;
+                window.isSearching = false;
+
+                btnExportCSV.visible = false;
+                txtInfo.text = "Search Timeout: Server or connection error";
+                processing.z = 0
+
             }
 
     //        activeMapType: supportedMapTypes[1]
@@ -389,19 +450,26 @@ Component {
 
                 cbSelectArea.checked = false;
                 window.isSearching = false;
+
+                btnExportCSV.visible = false;
+                txtInfo.text = "";
                 processing.z = 0
+
+
+
 
                 for(var i = 0; i< cycloneInfo.length;i++)
                     cycloneInfo.pop();
 
                 map.clearMapItems();
 
-                for(var i = 0; i< cycloneInfo.length;i++)
-                    map.points.pop();
-
                 //start drawing
                 if(data.length > 0){
                     btnClearMap.visible = true;
+
+                    if(window._platform === "2"){
+                        btnExportCSV.visible = true;
+                    }
 
 
                     // start drawing
@@ -415,8 +483,7 @@ Component {
                             for(var j = 0; j < data[i].tracks.length;j++)
                             {
                                // console.log(data[i].tracks[j].latitude + " " + data[i].tracks[j].longitude);
-                                var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
-                                Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
+                        //        Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
                                 if(j==0 && data[i].tracks.length >1)
                                 {// 14092016 start point
                                     var startpoint = Qt.createQmlObject('import QtLocation 5.3;import QtQuick 2.7;
@@ -442,12 +509,14 @@ Component {
                                 // // 28082016  update to match the requirement Line function
                                 if(j>0)
                                 {
+                                    var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j-1].latitude,data[i].tracks[j-1].longitude))
                                     Polyline.addCoordinate(QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude))
+                                    console.log(data[i].tracks[j-1].latitude+","+data[i].tracks[j-1].longitude +" - "+ data[i].tracks[j].latitude+","+data[i].tracks[j].longitude)
                                     Polyline.line.color = getTrackColor(data[i].tracks[j].windSpeed)
                                     Polyline.color = getTrackColor(data[i].tracks[j].windSpeed)
                                     Polyline.line.width = 3
-                                    Polyline.btnReport = btnExportCSV
+                                    //Polyline.btnReport = btnExportCSV
                                     Polyline.platform = window._platform
                                     Polyline.txtInfo = txtInfo
                                     Polyline.track = data[i].tracks[j]
@@ -456,9 +525,8 @@ Component {
                                 }
                             }
 
-                            for(var k = 0; k < lines.length;k++){
+                            for(var k = 0; k < lines.length-1;k++){
                                 lines[k].otherLines = lines
-
                                 map.addMapItem(lines[k])
                             }
                         }
@@ -601,6 +669,14 @@ Component {
                 id: f2
             }
         }
+
+    Component {
+            id: reportView
+            GenerateReport {
+                id: report
+            }
+        }
+
 
     Component.onCompleted: { stack.push(mapView); }
 

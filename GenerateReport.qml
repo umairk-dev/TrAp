@@ -8,25 +8,50 @@ import QtQuick.Controls.Styles 1.4
 Rectangle {
     id: rview
     color : "transparent"
+
+    FileDialog {
+        id: fileDialog
+        property string type
+        title: "Save Report"
+        folder: shortcuts.home
+        modality : "ApplicationModal"
+        selectExisting: false
+
+        onAccepted: {
+            console.log("You chose: " + fileDialog.fileUrls)
+            fileDialog.close();
+            fileDialog.visible = false;
+            _generateReport(type, fileDialog.fileUrl)
+            window.isReportScreen = false
+            stack.pop();
+        }
+        onRejected: {
+            console.log("Canceled");
+            fileDialog.close();
+            fileDialog.visible = false;
+        }
+        //Component.onCompleted: {visible = false; close();}
+    }
+
     ColumnLayout {
         id: columnLayout1
         spacing : 20
         Label {
             id: labelTitle
             color : "white"
-            text: qsTr("Generate Report:")
+            text: qsTr("Generate Report: ")
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
 
        ExclusiveGroup { id: searchTypeGroup }
        RadioButton {
-                id: radioButtonName
+                id: rbAll
                 exclusiveGroup: searchTypeGroup
                 checked: true
                 style: RadioButtonStyle{ label: Text {
                         color: "white"
-                        text: "Export CSV"
+                        text: "All Cyclones"
                     }}
                 Layout.topMargin: 10
                 Layout.leftMargin: 10
@@ -34,69 +59,32 @@ Rectangle {
 
 
        RadioButton {
-            id: radioButtonYear
+            id: rbSelected
             exclusiveGroup: searchTypeGroup
             style: RadioButtonStyle{ label: Text {
                     color: "white"
-                    text: "Generate PDF Report"
+                    text: "Selected Cyclones"
                 }}
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
 
-       Rectangle{
-           Label {
-               id: charts
-               color : "white"
-               text: qsTr("Add Charts:")
-               Layout.topMargin: 10
-               Layout.leftMargin: 10
-           }
-
-           CheckBox{
-               id : cbWind
-               style: CheckBoxStyle{ label: Text {
-                       color: "white"
-                       text: "Wind"
-                   }}
-           }
-
-
-           CheckBox{
-               id : cbPressure
-               style: CheckBoxStyle{ label: Text {
-                       color: "white"
-                       text: "Pressure"
-                   }}
-           }
-
-
-           CheckBox{
-               id : cbWind
-               style: CheckBoxStyle{ label: Text {
-                       color: "white"
-                       text: "Wind"
-                   }}
-           }
-
-       }
-
+    RowLayout{
        Button {
             id: buttonSearch
             text: qsTr("Generate Report")
             onClicked: {
                 var type,content;
-                if(radioButtonName.checked == true)
+                if(rbAll.checked === true)
                 {
-                    type = "csv"
-                }else if(radioButtonYear.checked == true)
+                    type = "all"
+                }else if(rbSelected.checked === true)
                 {
-                    type = "report"
+                    type = "selected"
                 }
+                fileDialog.type = type;
+                fileDialog.open();
 
-                genReport(type)
-
-                stack.pop()
             }
             Layout.topMargin: 10
             Layout.leftMargin: 10
@@ -106,11 +94,13 @@ Rectangle {
             id: btnCancel
             text: qsTr("Cancel")
             onClicked: {
-                window.isSearchScreen = false;
-                                stack.pop()
+                window.isReportScreen = false;
+                stack.pop()
             }
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
     }
+    }
+    Component.onCompleted: fileDialog.close();
 }

@@ -37,6 +37,7 @@ public
      void searchCycloneByPressure(const QString& pressureFrom, const QString& pressureTo);
      void searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius);
      void searchCycloneServiceFinished(QNetworkReply* reply);
+     void generateReport(const QString &path, const QVariant &cyclones);
 
       //void getWebView(QWebEngineView * view);
 

@@ -120,6 +120,11 @@ int main(int argc, char *argv[])
     &control, SLOT(clearMap()));
 
 
+    //control signal  - Clear Map
+    QObject::connect(window, SIGNAL(generateReport(QString,QVariant)),
+    &control, SLOT(generateReport(QString,QVariant)));
+
+
     //search signal
     //QObject::connect(window, SIGNAL(sendWebView(QWebEngineView)),
     //&control, SLOT(getWebView(QWebEngineView)));

@@ -9,7 +9,7 @@ class Cyclone : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString cycloneName READ getCycloneName WRITE setCycloneName)
-    Q_PROPERTY(QString cycloneID READ getCycloneID WRITE setCycloneName)
+    Q_PROPERTY(QString cycloneID READ getCycloneID WRITE setCycloneID)
     Q_PROPERTY(QString seasonYear READ getSeasonYear WRITE setSeasonYear)
     Q_PROPERTY(QString num READ getNum WRITE setNum)
     Q_PROPERTY(QString source READ getSource WRITE setSource)

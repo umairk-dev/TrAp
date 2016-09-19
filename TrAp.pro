@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick webview widgets sql
+QT += qml quick webview widgets sql core
 CONFIG += c++11
 
 SOURCES += main.cpp \

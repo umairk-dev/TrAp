@@ -10,7 +10,6 @@ MapPolyline {
         property variant color
         property variant track
         property variant otherLines
-        property variant btnReport
         property variant platform
         property variant txtInfo
         property bool doubleClick : false
@@ -54,9 +53,10 @@ MapPolyline {
                 if(platform === "2"){
                     if(doubleClick === false){
                         line.color = color
-                        txtInfo.text = ""
-                        txtInfo.z  = 0
+
                     }
+                    txtInfo.text = ""
+                    txtInfo.z  = 0
                 }
                 /*for(var i = 0; i < otherLines.length; i++){
                     otherLines[i].line.color = otherLines[i].color
@@ -69,13 +69,24 @@ MapPolyline {
 
                 if(platform === "2"){
 
-                    for(var i = 0; i < otherLines.length; i++){
-                        otherLines[i].line.color = "yellow"
-                        otherLines[i].line.width = 5
-                        otherLines[i].doubleClick = true
-                    }
+                    if(doubleClick == false){
+                        for(var i = 0; i < otherLines.length; i++){
+                            otherLines[i].line.color = "yellow"
+                            otherLines[i].line.width = 5
+                            otherLines[i].doubleClick = true
+                        }
+                        doubleClick = true
+                        selectCyclone(cyclone);
+                    }else{
+                        for(var i = 0; i < otherLines.length; i++){
+                            otherLines[i].line.color = otherLines[i].color
+                            otherLines[i].line.width = 3
+                            otherLines[i].doubleClick = false
 
-                    btnExportCSV.visible = true
+                        }
+                        doubleClick = false
+                        removeCyclone(cyclone);
+                    }
                 }
 
 
@@ -86,13 +97,13 @@ MapPolyline {
 
                 //var info = "Cyclone Name : " + c.cycloneName + "\n"
                 if(platform === "2"){
-                    for(var i = 0; i < otherLines.length; i++){
+                    /*for(var i = 0; i < otherLines.length; i++){
                         otherLines[i].line.color = otherLines[i].color
                         otherLines[i].line.width = 3
                         otherLines[i].doubleClick = false
 
-                    }
-                    doubleClick = false
+                    }*/
+                    //doubleClick = false
                 }else{
 
 
