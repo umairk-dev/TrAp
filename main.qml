@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtWebView 1.0
@@ -498,7 +498,7 @@ Component {
                     {
                         cycloneInfo.push(data[i])
                         // drawing track (if tracks are available)
-                        if( data[i].tracks.length>0 || i<40)
+                        if( data[i].tracks.length>0)
                         {
                             var lines = []
                             for(var j = 0; j < data[i].tracks.length;j++)
@@ -512,9 +512,9 @@ Component {
                                                                             anchorPoint.x: image.width * 0.5;
                                                                             anchorPoint.y: image.height * 0.5;
                                                                             sourceItem: Image { id: image;
-                                                                            source: "./images/" + dir[ppiRange] +"/hurricane.png" }
-                                                                              }',map)
-
+                                                                            source: "./images/" + dir[ppiRange] +"/hurricane.png"}
+                                                                            scale: map.zoomLevel/10
+                                                                               }',map)
                                     startpoint.coordinate = QtPositioning.coordinate(data[i].tracks[j].latitude,data[i].tracks[j].longitude)
                                     map.addMapItem(startpoint)
                                 }
@@ -546,7 +546,7 @@ Component {
                                 }
                             }
 
-                            for(var k = 0; k < lines.length-1;k++){
+                            for(var k = 0; k < lines.length;k++){
                                 lines[k].otherLines = lines
                                 map.addMapItem(lines[k])
                             }
