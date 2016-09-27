@@ -546,20 +546,20 @@ Component {
                             if(years[years.length-1]===cycloneInfo[i].seasonYear)
                             {// if the same year then
                                 tempyearscount++
-                                console.debug("[Debug2]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+//                                console.debug("[Debug2]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
                             }
                             else // different year
                             {
                                 yearscount.push(tempyearscount)
                                 tempyearscount=0
-                                console.debug("[Debug3]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+//                                console.debug("[Debug3]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
                                 years.push(cycloneInfo[i].seasonYear)
                             }
                             if(i===cycloneInfo.length-1) //the last item
                             {
                                 yearscount.push(tempyearscount)
                                 tempyearscount=0
-                                console.debug("[Debug4]year:["+cycloneInfo[i].seasonYear				+"]\tcount:[]"+tempyearscount+"]\n")
+//                                console.debug("[Debug4]year:["+cycloneInfo[i].seasonYear				+"]\tcount:[]"+tempyearscount+"]\n")
                             }
                         }
                     }
