@@ -39,5 +39,15 @@
         <file>images/XHDPI/Bar.png</file>
         <file>images/XXHDPI/Bar.png</file>
         <file>images/XXXHDPI/Bar.png</file>
+        <file>images/HDPI/filter.png</file>
+        <file>images/MDPI/filter.png</file>
+        <file>images/XHDPI/filter.png</file>
+        <file>images/XXHDPI/filter.png</file>
+        <file>images/XXXHDPI/filter.png</file>
+        <file>images/HDPI/filter_selected.png</file>
+        <file>images/MDPI/filter_selected.png</file>
+        <file>images/XHDPI/filter_selected.png</file>
+        <file>images/XXHDPI/filter_selected.png</file>
+        <file>images/XXXHDPI/filter_selected.png</file>
     </qresource>
 </RCC>

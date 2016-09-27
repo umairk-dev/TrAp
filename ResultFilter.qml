@@ -48,18 +48,20 @@ Rectangle {
                                             text: name
                                         }
                                     }
-                                    checked: visible
+                                    checked: {console.log(name + " " + cstate + " C-D"); if(cstate === true){ return true;} else{return false;}}
                                     onClicked:{
-                                            var tracks = items[index];
+                                            var tracks = window.mapView.cyclones[index];
+                                            console.log("length = " + tracks.length)
+                                            console.log(tracks)
+
                                             tracks[0].visible = cbEnable.checked
-                                            var lines = tracks[1];
-                                            console.log(lines.length)
-                                            for(var i = 0; i < lines.length; i++){
-                                                 lines[i].visible = cbEnable.checked;
-                                            }
-                                            var points = tracks[2];
-                                            for(var j = 0; j < points.length; j++){
-                                                 points[j].visible = cbEnable.checked;
+                                            tracks[3] = cbEnable.checked
+                                            cstate = cbEnable.checked
+                                            for(var i = 1; i < tracks.length-1; i++){
+                                                var mapItems = tracks[i]
+
+                                                for(var j = 0; j < mapItems.length; j++)
+                                                    mapItems[j].visible = cbEnable.checked;
                                             }
                                     }
 
@@ -99,8 +101,8 @@ Rectangle {
 
 
         for(var i = 0; i < cyclones.length; i++){
-            var track = items[i];
-            cycloneModel.get(0).cdata.append({name : cyclones[i].cycloneName, serial : cyclones[i].num, year : cyclones[i].seasonYear, visible : track[0].visible , index : i })
+            var track = window.mapView.cyclones[i];
+            cycloneModel.get(0).cdata.append({name : cyclones[i].cycloneName, serial : "S#:"+cyclones[i].num, year : "Y:"+cyclones[i].seasonYear, cstate : track[3] , index : i })
        }
     }
 

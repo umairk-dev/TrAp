@@ -63,12 +63,21 @@ Rectangle {
             exclusiveGroup: searchTypeGroup
             style: RadioButtonStyle{ label: Text {
                     color: "white"
-                    text: "Selected Cyclones"
+                    text: "Selected Cyclones (double-click to select)"
                 }}
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
-
+       RadioButton {
+            id: rbFiltered
+            exclusiveGroup: searchTypeGroup
+            style: RadioButtonStyle{ label: Text {
+                    color: "white"
+                    text: "Filtered Cyclones "
+                }}
+            Layout.topMargin: 10
+            Layout.leftMargin: 10
+        }
     RowLayout{
        Button {
             id: buttonSearch
@@ -81,10 +90,14 @@ Rectangle {
                 }else if(rbSelected.checked === true)
                 {
                     type = "selected"
-                }
+                }else if(rbFiltered.checked === true)
+                {
+                    type = "filtered"
+                }else
+                    type = "all"
+
                 fileDialog.type = type;
                 fileDialog.open();
-
             }
             Layout.topMargin: 10
             Layout.leftMargin: 10

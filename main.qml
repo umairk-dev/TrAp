@@ -23,6 +23,7 @@ ApplicationWindow  {
     property string _platform: platform
     property bool isSearchScreen: false
     property bool isReportScreen: false
+    property bool isFilterScreen: false
     // 26092016 [S] ChartView show after search
     //property bool isChartConfigScreen: false
     property bool isChartScreen: false
@@ -100,7 +101,7 @@ ApplicationWindow  {
 
 
     Text {
-        x : 20
+        x : parent.width/2
         y : 20
         z : 70
 
@@ -213,8 +214,16 @@ ApplicationWindow  {
     function _generateReport(type, path){
         if(type === "all"){
             generateReport(path, cycloneInfo);
-        }else{
+        }else if(type === "selected"){
             generateReport(path, selectedCyclones);
+        }else{
+            var filtered = []
+            for(var i = 0; i < cycloneInfo.length; i++){
+                if((window.mapView.cyclones[i])[3] === true)
+                    filtered.push(cycloneInfo[i])
+            }
+            generateReport(path, filtered);
+
         }
     }
 
@@ -303,6 +312,24 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
+
+                ToolButton {
+                    id : btnFilter
+                    iconSource: "./images/" + dir[ppiRange] +"/filter.png"
+                    visible: false
+                    onClicked:  if(isFilterScreen === false){
+                                    if(cycloneInfo.length > 0){
+                                        stack.push(resultFilterView)
+                                        isFilterScreen = true
+                                        btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter_selected.png"
+                                    }
+                                }else{
+                                    stack.pop(resultFilterView)
+                                    isFilterScreen = false
+                                    btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
+                                }
+                }
+
                 ToolButton {
                     id : btnChart
                     iconSource: "./images/" + dir[ppiRange] +"/Bar.png"
@@ -625,7 +652,6 @@ Component {
                                                                                }',map)
                                     startpoint.coordinate = QtPositioning.coordinate(data.tracks[j].latitude,data.tracks[j].longitude)
                                     map.addMapItem(startpoint)
-                                    trackData.push(startpoint);
                                 }
                                 else
                                 {// 14092016 normal cycle
@@ -660,7 +686,7 @@ Component {
                             trackData.push(startpoint);
                             trackData.push(points);
                             trackData.push(lines);
-
+                            trackData.push(true);
                             map.cyclones.push(trackData);
 
                             for(var k = 0; k < lines.length;k++){
@@ -676,6 +702,8 @@ Component {
                                 btnExportCSV.visible = true;
                                 // 26092016 [S] ChartView show after search
                                 btnChart.visible=true;
+                                txtResultCount.text = "Total Cyclones: " + total
+                                btnFilter.visible = true
                                 // 26092016 [E] ChartView show after search
                             }
                         }
@@ -695,6 +723,7 @@ Component {
 
                     if(window._platform === "2"){
                         btnExportCSV.visible = false
+                        btnFilter.visible = false
                     }
                 }
             }
