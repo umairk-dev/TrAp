@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
 
 
     //search signal  - by Area
-    QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString)),
-    &control, SLOT(searchCycloneByArea(QString,QString,QString)));
+    QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString,QString)),
+    &control, SLOT(searchCycloneByArea(QString,QString,QString,QString)));
 
 
     //control signal  - EnableDisable Map Mouse

@@ -15,6 +15,7 @@ MapPolyline {
         property bool doubleClick : false
 
 
+
         MouseArea {
 
             anchors.fill: parent

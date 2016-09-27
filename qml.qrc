@@ -32,5 +32,6 @@
         <file>images/XHDPI/hurricane.png</file>
         <file>images/XXHDPI/hurricane.png</file>
         <file>images/XXXHDPI/hurricane.png</file>
+        <file>ResultFilter.qml</file>
     </qresource>
 </RCC>

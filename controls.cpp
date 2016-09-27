@@ -46,14 +46,16 @@ void Controls::searchCycloneByName(const QString &name)
 }
 
 
-void Controls::searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius)
+void Controls::searchCycloneByArea(const QString &lat1, const QString &lng1,const QString &lat2, const QString &lng2)
 {
 
        QNetworkAccessManager * nam = new QNetworkAccessManager(this);
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
 
-       QUrl url("http://smarttechsoft.com/trap/index.php?type=area&lat=" + lat +"&lng=" + lng + "&radius=" + radius);
+//       "http://smarttechsoft.com/trap/index.php?type=area&lat=" + lat +"&lng=" + lng + "&radius=" + radius
+
+       QUrl url( "http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyregion&latfrom="+lat1+"&lntfrom="+lng1+"&latto="+lat2+"&lntto="+lng2);
        QNetworkReply* reply = nam->get(QNetworkRequest(url));
 
       // emit setTextField(in.toUpper());
@@ -257,13 +259,24 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
             }
         }
 
+
       //  qDebug() << cyclones.size();
         QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
         if(webView)
         {
-            if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones))))
-               qDebug() << "Failed to invoke push";
+            if(cyclones.size() > 0){
+                for(int i = 0; i < cyclones.size(); i++){
+                    if(!QMetaObject::invokeMethod(webView, "searchResult", Q_ARG(QVariant, QVariant::fromValue(cyclones.at(i)))
+                                                                            ,Q_ARG(QVariant, QVariant::fromValue(i)),Q_ARG(QVariant,
+                                                                             QVariant::fromValue(cyclones.size()))))
+                        qDebug() << "Failed to invoke push";
 
+                    delay();
+                }
+            }else{
+                if(!QMetaObject::invokeMethod(webView, "noResult"))
+                    qDebug() << "Failed to invoke push";
+            }
         }
     } else {
         QObject *webView = _engine->rootObjects().at(0)->findChild<QObject*>("map");
@@ -279,6 +292,13 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 }
 
 
+
+void Controls::delay()
+{
+    QTime dieTime= QTime::currentTime().addSecs(1);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
 
 
 

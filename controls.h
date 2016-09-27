@@ -11,7 +11,7 @@ class Controls : public QObject
     Q_OBJECT
 
 private:
-
+       void delay();
 public:
     explicit Controls(QObject  *parent = 0);
     Q_INVOKABLE  void onHello();
@@ -35,7 +35,7 @@ public
      void searchCycloneByYears(const QString& yearFrom, const QString& yearTo);
      void searchCycloneByWind(const QString& windFrom, const QString& windTo);
      void searchCycloneByPressure(const QString& pressureFrom, const QString& pressureTo);
-     void searchCycloneByArea(const QString &lat, const QString &lng,const QString &radius);
+     void searchCycloneByArea(const QString &lat1, const QString &lng1,const QString &lat2,const QString &lng2);
      void searchCycloneServiceFinished(QNetworkReply* reply);
      void generateReport(const QString &path, const QVariant &cyclones);
 
