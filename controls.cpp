@@ -295,7 +295,7 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
 void Controls::delay()
 {
-    QTime dieTime= QTime::currentTime().addSecs(1);
+    QTime dieTime= QTime::currentTime().addMSecs(1);
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }

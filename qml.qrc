@@ -33,5 +33,11 @@
         <file>images/XXHDPI/hurricane.png</file>
         <file>images/XXXHDPI/hurricane.png</file>
         <file>ResultFilter.qml</file>
+        <file>MyChartView.qml</file>
+        <file>images/HDPI/Bar.png</file>
+        <file>images/MDPI/Bar.png</file>
+        <file>images/XHDPI/Bar.png</file>
+        <file>images/XXHDPI/Bar.png</file>
+        <file>images/XXXHDPI/Bar.png</file>
     </qresource>
 </RCC>

@@ -1,4 +1,5 @@
 import QtQuick 2.7
+import QtCharts 2.1
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtWebView 1.0
@@ -22,6 +23,10 @@ ApplicationWindow  {
     property string _platform: platform
     property bool isSearchScreen: false
     property bool isReportScreen: false
+    // 26092016 [S] ChartView show after search
+    //property bool isChartConfigScreen: false
+    property bool isChartScreen: false
+    // 26092016 [E] ChartView show after search
     property int ppi: Screen.pixelDensity*25.4
     property variant cycloneInfo: []
     property Map mapView
@@ -41,6 +46,12 @@ ApplicationWindow  {
     // 19092016 [S] area selection
     property bool areaSelectMode:false
     // 19092016 [E] area selection
+    //
+    property variant catelist: []
+    property variant catevalues: []
+    property variant rangemax: []
+    property variant rangemin: []
+    //
     readonly property int ppiRange:{
      if (ppi>=540)
       5
@@ -292,7 +303,19 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
-
+                ToolButton {
+                    id : btnChart
+                    iconSource: "./images/" + dir[ppiRange] +"/Bar.png"
+                    visible: false
+                    onClicked:     if(window.isReportScreen === false && window.isSearchScreen===false){
+                                    if(window.isChartScreen !== false){
+                                        window.isChartScreen = false;
+                                        stack.pop();
+                                    }
+                                    window.isChartScreen = true;
+                                    stack.push(mychartView);
+                                }
+                }
 //                CheckBox{ //old
 //                    id : cbSelectArea
 //                    text : "Select Area"
@@ -448,6 +471,9 @@ Component {
                 map.clearMapItems();
                 map.cyclones = [];
                 btnExportCSV.visible = false;
+                // 26092016 [S] ChartView show after search
+                btnChart.visible = false;
+                // 26092016 [E] ChartView show after search
                 txtInfo.text = "";
                 txtResultCount.text = ""
             }
@@ -497,6 +523,53 @@ Component {
 
             //1. each cyclone track woule be the same color
             //2. the point of cyclone use different color show the intensity
+            function setChartInfo()
+            {
+//                if(selectinfo)
+//                {
+                    //var
+                    var years=[]
+                    var tempyearscount=0
+                    var yearscount=[]
+                    //
+                //If select to show year
+                    for(var i=0;i<cycloneInfo.length;i++)
+                    {
+                        if(i==0)
+                        {
+                            years.push(cycloneInfo[i].seasonYear)
+                            tempyearscount++
+        //                            console.debug("[Debug]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+                        }
+                        else
+                        {
+                            if(years[years.length-1]===cycloneInfo[i].seasonYear)
+                            {// if the same year then
+                                tempyearscount++
+                                console.debug("[Debug2]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+                            }
+                            else // different year
+                            {
+                                yearscount.push(tempyearscount)
+                                tempyearscount=0
+                                console.debug("[Debug3]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+                                years.push(cycloneInfo[i].seasonYear)
+                            }
+                            if(i===cycloneInfo.length-1) //the last item
+                            {
+                                yearscount.push(tempyearscount)
+                                tempyearscount=0
+                                console.debug("[Debug4]year:["+cycloneInfo[i].seasonYear				+"]\tcount:[]"+tempyearscount+"]\n")
+                            }
+                        }
+                    }
+                    //update
+                    catelist=years
+                    catevalues=yearscount
+                    rangemax=Math.max(yearscount)
+                    rangemin=Math.min(yearscount)
+//                }
+            }
 
             function searchResult(data, current, total){
                 //ToDo: clear function
@@ -525,11 +598,6 @@ Component {
 
                     txtResultCount.text = "Cyclones Loaded: " + (current+1) + " / " +total
                     btnClearMap.visible = true;
-
-                    if(window._platform === "2"){
-                        btnExportCSV.visible = true;
-                    }
-
 
                     // start drawing
                     //for(var i=0;i<data.length;i++)
@@ -601,7 +669,16 @@ Component {
                             }
                         }
                    // }
-
+                        if(current+1===total)
+                        {
+                            setChartInfo()
+                            if(window._platform === "2"){
+                                btnExportCSV.visible = true;
+                                // 26092016 [S] ChartView show after search
+                                btnChart.visible=true;
+                                // 26092016 [E] ChartView show after search
+                            }
+                        }
 
                 }else{
                     btnExportCSV.visible = false;
@@ -776,6 +853,21 @@ Component {
     Component.onCompleted: { stack.push(mapView);
                            // window.mapView = mapView;
     }
+    // 21092016 [S] BarChart
+
+    Component {
+            id: mychartView
+            MyChartView {
+//                title:""
+                categorieslist: catelist
+                categoriesvalues:  catevalues
+                maxcycloneNo: rangemax
+                mincycloneNo: rangemin
+            }
+
+    }
+    // 21092016 [E] BarChart
+//    Component.onCompleted: { stack.push(mapView); }
 
     // [S] intensity info
     Rectangle{

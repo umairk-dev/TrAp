@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>//<QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtWebView/QtWebView>
 #include <QQmlContext>
@@ -20,7 +20,7 @@
 #endif
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv); //QGuiApplication app(argc, argv);123
     qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
 
     QtWebView::initialize();
