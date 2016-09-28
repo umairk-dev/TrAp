@@ -52,6 +52,7 @@ ApplicationWindow  {
     property variant catevalues: []
     property variant rangemax: []
     property variant rangemin: []
+    property bool cvCleanFlag
     //
     readonly property int ppiRange:{
      if (ppi>=540)
@@ -384,7 +385,15 @@ ApplicationWindow  {
                                     window.isSearchScreen = true;
                                     stack.push(searchingView);
                                     txtInfo.text = "";
+
+//                                    if(isFilterScreen === true){
+//                                        stack.pop(resultFilterView)
+//                                        isFilterScreen = false
+//                                        btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
+//                                    }
                                 }
+
+
 
                 }
                 ToolButton {
@@ -521,8 +530,10 @@ Component {
             function searchError(){
 //                cbSelectArea.checked = false;
                 window.isSearching = false;
-
                 btnExportCSV.visible = false;
+                // 26092016 [S] ChartView show after search
+                btnChart.visible = false;
+                // 26092016 [E] ChartView show after search
                 txtInfo.text = "Search Timeout: Server or connection error";
                 txtResultCount.text = ""
                 processing.z = 0
@@ -537,6 +548,9 @@ Component {
                 window.isSearching = false;
 
                 btnExportCSV.visible = false;
+                // 26092016 [S] ChartView show after search
+                btnChart.visible = false;
+                // 26092016 [E] ChartView show after search
                 txtInfo.text = "No Cyclones Found..";
                 processing.z = 0
                 for(var i = 0; i< cycloneInfo.length;i++)
@@ -552,6 +566,12 @@ Component {
             //2. the point of cyclone use different color show the intensity
             function setChartInfo()
             {
+                //clean
+                catelist=[]
+                catevalues=[]
+                rangemax=[]
+                rangemin=[]
+                   console.debug("[debug count]count cate:"+catelist.length+"\tvalue:"+catevalues.length + " - c"+cycloneInfo.length)
 //                if(selectinfo)
 //                {
                     //var
@@ -591,10 +611,13 @@ Component {
                         }
                     }
                     //update
+                    cvCleanFlag=true
                     catelist=years
                     catevalues=yearscount
                     rangemax=Math.max(yearscount)
                     rangemin=Math.min(yearscount)
+                    console.debug("[debug count_main2]count cate:"+catelist.length+"\tvalue:"+catevalues.length)
+                    cvCleanFlag=false
 //                }
             }
 
@@ -614,13 +637,22 @@ Component {
                     if(current === 0){
 
                         btnExportCSV.visible = false;
+                        // 26092016 [S] ChartView show after search
+                        btnChart.visible = false;
+                        // 26092016 [E] ChartView show after search
                         txtInfo.text = "";
                         processing.z = 0
                         window.mapView = map;
                         for(var i = 0; i< cycloneInfo.length;i++)
                             cycloneInfo.pop();
+                        cycloneInfo = []
                         map.cyclones = [];
                         map.clearMapItems();
+                        if(isFilterScreen === true){
+                            stack.pop(resultFilterView)
+                            isFilterScreen = false
+                            btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
+                        }
                     }
 
                     txtResultCount.text = "Cyclones Loaded: " + (current+1) + " / " +total
@@ -714,8 +746,9 @@ Component {
                     processing.z = 0
                     txtResultCount.text = ""
                     window.mapView = map;
-                    for(var j = 0; j< cycloneInfo.length;j++)
+                    for(var i = 0; i< cycloneInfo.length;i++)
                         cycloneInfo.pop();
+                    cycloneInfo = []
                     map.cyclones = [];
                     map.clearMapItems();
 
@@ -723,8 +756,17 @@ Component {
 
                     if(window._platform === "2"){
                         btnExportCSV.visible = false
+                        // 26092016 [S] ChartView show after search
+                        btnChart.visible = false;
+                        // 26092016 [E] ChartView show after search
                         btnFilter.visible = false
                     }
+                    if(isFilterScreen === true){
+                        stack.pop(resultFilterView)
+                        isFilterScreen = false
+                        btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
+                    }
+
                 }
             }
 
@@ -887,14 +929,15 @@ Component {
     Component {
             id: mychartView
             MyChartView {
-//                title:""
-                categorieslist: catelist
-                categoriesvalues:  catevalues
-                maxcycloneNo: rangemax
-                mincycloneNo: rangemin
+                categorieslist :  catelist
+                categoriesvalues :   catevalues
+                maxcycloneNo : rangemax
+                mincycloneNo : rangemin
+                clearflag : cvCleanFlag
             }
 
     }
+
     // 21092016 [E] BarChart
 //    Component.onCompleted: { stack.push(mapView); }
 
