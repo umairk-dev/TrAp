@@ -56,11 +56,14 @@ Rectangle {
                         // 18092016 [E] predefine country search
                         // 19092016 [S] area selection
                         if(cbArea.checked){
+                            type=serchingitem[3]
+                            addSearchCondtion(type,"")
                             areaSearchCheck(cbArea.checked)
                         }
                         // 19092016 [E] area selection
                         /*18082016 [E] Search signal*/
-                        doSearch()//12092016 [S] Search signal
+                        if(!cbArea.checked)
+                            doSearch()//12092016 [S] Search signal
 
                         stack.pop()
                     }
@@ -159,8 +162,8 @@ Rectangle {
             Layout.leftMargin: 10
             from: 1900
             to:2016
-            first.value: 1910
-            second.value: 2000
+            first.value: 1985
+            second.value: 2015
             stepSize: 1.0
         }
 

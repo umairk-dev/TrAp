@@ -22,7 +22,7 @@ signals:
 
 private:
      QQmlApplicationEngine* _engine;
-
+     QString Controls::resrtucturePara(const QVariant &multiplePara);
 public
 
 
@@ -36,6 +36,7 @@ public
      void searchCycloneByWind(const QString& windFrom, const QString& windTo);
      void searchCycloneByPressure(const QString& pressureFrom, const QString& pressureTo);
      void searchCycloneByArea(const QString &lat1, const QString &lng1,const QString &lat2,const QString &lng2);
+     void searchCycloneByMultiPara(const QVariant& multiplePara);
      void searchCycloneServiceFinished(QNetworkReply* reply);
      void generateReport(const QString &path, const QVariant &cyclones);
 

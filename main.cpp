@@ -108,12 +108,14 @@ int main(int argc, char *argv[])
     //search signal  - by Area
     QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString,QString)),
     &control, SLOT(searchCycloneByArea(QString,QString,QString,QString)));
-
-
+    // 29092016 [S] search by multiple parameter
+    //search signal  - by Multiple Parameter (searchByMultiPara)
+    QObject::connect(window, SIGNAL(searchByMultiPara(QVariant)),
+    &control, SLOT(searchCycloneByMultiPara(QVariant)));
+    // 29092016 [E] search by multiple parameter
     //control signal  - EnableDisable Map Mouse
     QObject::connect(window, SIGNAL(controlMapMouse(bool)),
     &control, SLOT(controlMapMouse(bool)));
-
 
     //control signal  - Clear Map
     QObject::connect(window, SIGNAL(clearMap()),

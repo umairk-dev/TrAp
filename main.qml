@@ -47,13 +47,16 @@ ApplicationWindow  {
     // 19092016 [S] area selection
     property bool areaSelectMode:false
     // 19092016 [E] area selection
-    //
+    // 26092016 [S] var for bar chart
     property variant catelist: []
     property variant catevalues: []
     property variant rangemax: []
     property variant rangemin: []
-    property bool cvCleanFlag
-    //
+    // 26092016 [E] var for bar chart
+    // 29092016 [S] var for searching
+    property var serchingitem: ['year','wind','pressure','area','country']
+    property var selectingArea: []
+    // 29092016 [E] var for searching
     readonly property int ppiRange:{
      if (ppi>=540)
       5
@@ -70,7 +73,6 @@ ApplicationWindow  {
      }
 
     /****************************************/
-
 
     MessageDialog {
         id: messageDialog
@@ -119,9 +121,6 @@ ApplicationWindow  {
              color : "white"
          }
 
-
-
-
     function getTrackColor(windSpeed){
         if(windSpeed===-999)
                 return intensity_colours[0]
@@ -140,7 +139,6 @@ ApplicationWindow  {
         else
                 return intensity_colours[7]
     }
-
 
     //Info Box
     function showTrackInfo(_data){
@@ -166,10 +164,12 @@ ApplicationWindow  {
     signal searchByYears(string yearFrom, string yearTo)
     signal searchByPressure(string pressureFrom, string pressureTo)
     signal searchByArea(string lat1, string lng1, string lat2, string lng2)
+    // 29092016 [S] search by multiple parameter
+    signal searchByMultiPara(variant multisearchpara)
+    // 29092016 [E] search by multiple parameter
     signal generateReport(string path, variant cyclones)
     signal controlMapMouse(bool status);
     signal clearMap();
-
 
     //  signal sendWebView(WebEngineView view)
 
@@ -246,7 +246,7 @@ ApplicationWindow  {
       {//single type search
 //            console.log("[DBG] Type:"+searchType.length+"||"+searchType[searchType.length-1]+"\tPara"+searchPara.length+"||"+searchPara[searchPara.length-1])
           var singleSearchPara
-           if(searchType[searchType.length-1] === "year")
+           if(searchType[searchType.length-1] === serchingitem[0])
            {
                if(searchPara.length === 1 && searchPara[searchPara.length-1].length ===4)
                {
@@ -261,19 +261,26 @@ ApplicationWindow  {
                    searchByYears(singleSearchPara[0],singleSearchPara[1])
                }//searchByYearRange(searchPara[searchPara.length-1]);
            }
-           else if(searchType[searchType.length-1] === "wind" ){
+           else if(searchType[searchType.length-1] === serchingitem[1] ){
                singleSearchPara = String(searchPara[searchType.length-1]).split(',')
-//               console.log("[DBG]p1"+paraWind[0]+"\tp2"+paraWind[1])
+//               console.log("[DBG_wind]p1"+singleSearchPara[0]+"\tp2"+singleSearchPara[1])
                processing.z = 60
                searchByWind(singleSearchPara[0],singleSearchPara[1])
            }
-           else if(searchType[searchType.length-1] === "pressure" ){
+           else if(searchType[searchType.length-1] === serchingitem[2] ){
                singleSearchPara = String(searchPara[searchType.length-1]).split(',')
 //               console.log("[DBG]p1"+singleSearchPara[0]+"\tp2"+singleSearchPara[1])
                processing.z = 60
                searchByPressure(singleSearchPara[0],singleSearchPara[1])
            }
-           else if(searchType[searchType.length-1] === "country" ){
+           else if(searchType[searchType.length-1] === serchingitem[3] ){
+           // 29092016 [S] area search
+//               console.log("[DBG]type3:[L]"+selectingArea.length+"\tp2"+selectingArea[0])
+               processing.z = 60
+               searchByArea(parseFloat(selectingArea[0]),parseFloat(selectingArea[1]),parseFloat(selectingArea[2]),parseFloat(selectingArea[3]))
+           // 29092016 [E] area search
+           }
+           else if(searchType[searchType.length-1] === serchingitem[4] ){
            // 18092016 [E] predefine country search
            //preDefineCountry
                singleSearchPara = String(preDefineCountry[parseInt(searchPara[searchType.length-1])]).split(',')
@@ -284,8 +291,31 @@ ApplicationWindow  {
            }
       }
          else
-        {//multi type search
-        }
+        {//29092016 [S] area search - multi type search
+            var multiSearchPara=[]
+
+            for(var i=0;i<searchType.length;i++)
+            {
+                if(searchType[i] === serchingitem[3])
+                {
+                    multiSearchPara.push(serchingitem[3],selectingArea)
+                }
+                else if(searchType[i] === serchingitem[4])
+                {
+                    var longlatitude=String(preDefineCountry[parseInt(searchPara[searchType.length-1])]).split(',')
+                    multiSearchPara.push(serchingitem[3],longlatitude)
+                }
+                else
+                {
+                    multiSearchPara.push(searchType[i],searchPara[i])
+                }
+            }
+            //call the function to search
+            //ToDO: remove it, debug only
+            for(var j=0;j<multiSearchPara.length;j++)
+                console.debug("[dubug multi para] j:"+j+"[para]"+multiSearchPara[j])
+            searchByMultiPara(multiSearchPara)
+        }//29092016 [E] area search - multi type search
     }
     // 14092016 [E] new search mechanism
     // 19092016 [S] area selection
@@ -344,11 +374,6 @@ ApplicationWindow  {
                                     stack.push(mychartView);
                                 }
                 }
-//                CheckBox{ //old
-//                    id : cbSelectArea
-//                    text : "Select Area"
-//                    onCheckedChanged: {controlMapMouse(cbSelectArea.checked)}
-//                }
 
                 ToolButton {
                     id : btnClearMap
@@ -392,8 +417,6 @@ ApplicationWindow  {
 //                                        btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
 //                                    }
                                 }
-
-
 
                 }
                 ToolButton {
@@ -571,7 +594,7 @@ Component {
                 catevalues=[]
                 rangemax=[]
                 rangemin=[]
-                   console.debug("[debug count]count cate:"+catelist.length+"\tvalue:"+catevalues.length + " - c"+cycloneInfo.length)
+//                   console.debug("[debug count]count cate:"+catelist.length+"\tvalue:"+catevalues.length + " - c"+cycloneInfo.length)
 //                if(selectinfo)
 //                {
                     //var
@@ -611,13 +634,13 @@ Component {
                         }
                     }
                     //update
-                    cvCleanFlag=true
+//                    cvCleanFlag=true
                     catelist=years
                     catevalues=yearscount
                     rangemax=Math.max(yearscount)
                     rangemin=Math.min(yearscount)
-                    console.debug("[debug count_main2]count cate:"+catelist.length+"\tvalue:"+catevalues.length)
-                    cvCleanFlag=false
+//                    console.debug("[debug count_main2]count cate:"+catelist.length+"\tvalue:"+catevalues.length)
+//                    cvCleanFlag=false
 //                }
             }
 
@@ -671,8 +694,12 @@ Component {
                             var startpoint;
                             for(var j = 0; j < data.tracks.length;j++)
                             {
+                                // 29092016 [S] the degree more than 180 issue - work around
+                                if(data.tracks[j].longitude>180)
+                                   data.tracks[j].longitude=data.tracks[j].longitude-360.0
+                                // 29092016 [E] the degree more than 180 issue - work around
 
-                               if(j==0 && data.tracks.length >1)
+                                if(j==0 && data.tracks.length >1)
                                 {// 14092016 start point
                                     startpoint = Qt.createQmlObject('import QtLocation 5.3;import QtQuick 2.7;
                                                                             MapQuickItem { id: cyclonemarker;
@@ -704,7 +731,7 @@ Component {
 //                                    console.log(data[i].tracks[j-1].latitude+","+data[i].tracks[j-1].longitude +" - "+ data[i].tracks[j].latitude+","+data[i].tracks[j].longitude)
                                     Polyline.line.color = getTrackColor(data.tracks[j].windSpeed)
                                     Polyline.color = getTrackColor(data.tracks[j].windSpeed)
-                                    Polyline.line.width = 3
+                                    Polyline.line.width = 5
                                     //Polyline.btnReport = btnExportCSV
                                     Polyline.platform = window._platform
                                     Polyline.txtInfo = txtInfo
@@ -823,8 +850,13 @@ Component {
                             searchByArea(lat, lng, radius )
                         }
 */
-                        searchByArea(lat1, lng1, lat2,lng2 )
-
+//                        searchByArea(lat1, lng1, lat2,lng2 )old
+                        // 29092016 [E] var for searching
+//                            console.debug("[dbg][mouse postition]")
+                        selectingArea.push(lat1, lng1, lat2,lng2)
+                        doSearch()
+                        areaSelectMode=false
+                        // 29092016 [E] var for searching
                         dragRect.x = 0
                         dragRect.y = 0
                         dragRect.height = 0
@@ -933,7 +965,7 @@ Component {
                 categoriesvalues :   catevalues
                 maxcycloneNo : rangemax
                 mincycloneNo : rangemin
-                clearflag : cvCleanFlag
+//                clearflag : cvCleanFlag
             }
 
     }

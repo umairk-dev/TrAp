@@ -82,6 +82,7 @@ void Controls::searchCycloneByWind(const QString &windFrom, const QString &windT
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbywind&windfrom="+ windFrom +"&windto="+windTo+"&_format=json&source=2");
+//       qDebug() << url;
        QNetworkReply* reply = nam->get(QNetworkRequest(url));
 }
 
@@ -104,6 +105,55 @@ void Controls::searchCycloneByPressure(const QString &pressureFrom,const QString
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbypressure&pressurefrom="+pressureFrom+"&pressureto="+ pressureTo +"&_format=json&source=2");
        QNetworkReply* reply = nam->get(QNetworkRequest(url));
+}
+
+QString Controls::resrtucturePara(const QVariant &multiplePara)
+{
+       QString sPara="";
+       QList<QVariant> list = multiplePara.toList();
+
+       qDebug()<<"[Vince DBG2]size"<<list.size()<<"Para:"<<list;
+       for(int i=0;i<list.size();i=i+2)
+       {
+           //QString wPara=list[i+1].toString();
+           //QStringList paras=wPara.split(",");
+           QString wPara=list[i+1].toString();
+           QStringList paras=wPara.split(",");
+            if(list[i]=="year")
+            {
+
+                sPara+="&yearfrom="+paras[0]+"&yearto="+paras[1];
+            }
+            if(list[i]=="wind")
+            {
+                sPara+="&windfrom="+paras[0]+"&windto="+paras[1];
+            }
+            if(list[i]=="pressure")
+            {
+                sPara+="&pressurefrom="+paras[0]+"&pressureto="+paras[1];
+            }
+            if(list[i]=="area")
+            {//
+                QVariantList areaList = list[i+1].toList();
+                qDebug()<<"[Vince DBG3]area_size"<<wPara.size();
+                sPara+="&latfrom="+areaList[0].toString()+"&lntfrom="+areaList[1].toString()+"&latto="+areaList[2].toString()+"&lntto="+areaList[3].toString();
+            }
+       }
+       sPara+="&source=2&_format=json";
+       qDebug() << "[VinceDebug]sPara:"<<sPara;
+       return sPara;
+}
+
+void Controls::searchCycloneByMultiPara(const QVariant &multiplePara)
+{
+//       qDebug()<<"[Vince DBG1]"<<multiplePara;
+       QString sPara=resrtucturePara(multiplePara);
+       QNetworkAccessManager * nam = new QNetworkAccessManager(this);
+       QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
+       QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchall"+sPara);
+       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+
 }
 
 void Controls::clearMap()

@@ -10,7 +10,7 @@ Rectangle {
     height: parent.height*0.25
     anchors.top :parent.top
     anchors.right: parent.right
-    property bool clearflag:false
+//    property bool clearflag:false
     property variant categorieslist : [] // year...
     property variant categoriesvalues : []         // number of cyclone
     property variant maxcycloneNo : []
@@ -94,19 +94,19 @@ Rectangle {
             axisY:valueAxisY
             BarSet { label: "Cyclones"; values: categoriesvalues }
         }
-        function cvClear()
-        {
-            if(clearflag===true)
-            {
-                mySeries.clear()
-                categorieslist=[] // year...
-                categoriesvalues=[]         // number of cyclone
-//                maxcycloneNo=[]
-//                mincycloneNo=[]
-                console.debug("[debug clear]categoriesvalues:"+categoriesvalues.length+"\tlist:"+categorieslist.length)
-                clearflag=false
-            }
-        }
+//        function cvClear()
+//        {
+//            if(clearflag===true)
+//            {
+//                mySeries.clear()
+//                categorieslist=[] // year...
+//                categoriesvalues=[]         // number of cyclone
+////                maxcycloneNo=[]
+////                mincycloneNo=[]
+//                console.debug("[debug clear]categoriesvalues:"+categoriesvalues.length+"\tlist:"+categorieslist.length)
+////                clearflag=false
+//            }
+//        }
     }
 //    onCategoriesvaluesChanged:cvShow.cvClear()
 //    onClearflagChanged: cvShow.cvClear()

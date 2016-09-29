@@ -73,7 +73,7 @@ MapPolyline {
                     if(doubleClick == false){
                         for(var i = 0; i < otherLines.length; i++){
                             otherLines[i].line.color = "yellow"
-                            otherLines[i].line.width = 5
+                            otherLines[i].line.width = 8
                             otherLines[i].doubleClick = true
                         }
                         doubleClick = true
@@ -81,7 +81,7 @@ MapPolyline {
                     }else{
                         for(var i = 0; i < otherLines.length; i++){
                             otherLines[i].line.color = otherLines[i].color
-                            otherLines[i].line.width = 3
+                            otherLines[i].line.width = 5
                             otherLines[i].doubleClick = false
 
                         }
