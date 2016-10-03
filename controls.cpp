@@ -112,7 +112,7 @@ QString Controls::resrtucturePara(const QVariant &multiplePara)
        QString sPara="";
        QList<QVariant> list = multiplePara.toList();
 
-       qDebug()<<"[Vince DBG2]size"<<list.size()<<"Para:"<<list;
+//       qDebug()<<"[Vince DBG2]size"<<list.size()<<"Para:"<<list;
        for(int i=0;i<list.size();i=i+2)
        {
            //QString wPara=list[i+1].toString();
@@ -135,7 +135,7 @@ QString Controls::resrtucturePara(const QVariant &multiplePara)
             if(list[i]=="area")
             {//
                 QVariantList areaList = list[i+1].toList();
-                qDebug()<<"[Vince DBG3]area_size"<<wPara.size();
+//                qDebug()<<"[Vince DBG3]area_size"<<wPara.size();
                 sPara+="&latfrom="+areaList[0].toString()+"&lntfrom="+areaList[1].toString()+"&latto="+areaList[2].toString()+"&lntto="+areaList[3].toString();
             }
        }

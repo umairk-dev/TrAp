@@ -407,6 +407,12 @@ ApplicationWindow  {
                                         window.isReportScreen = false;
                                         stack.pop();
                                     }
+                                    // close the bar chart
+                                    if(window.isChartScreen !== false){
+                                        window.isChartScreen = false;
+                                        stack.pop();
+                                    }
+                                    //
                                     window.isSearchScreen = true;
                                     stack.push(searchingView);
                                     txtInfo.text = "";
@@ -594,7 +600,7 @@ Component {
                 catevalues=[]
                 rangemax=[]
                 rangemin=[]
-//                   console.debug("[debug count]count cate:"+catelist.length+"\tvalue:"+catevalues.length + " - c"+cycloneInfo.length)
+//                   console.debug("[debug count]count cate:"+catelist.length+"\tvalue:"+catevalues.length + " - [cyc]:"+cycloneInfo.length)
 //                if(selectinfo)
 //                {
                     //var
@@ -603,13 +609,19 @@ Component {
                     var yearscount=[]
                     //
                 //If select to show year
+                    if(cycloneInfo.length===1)
+                    {
+                        years.push(cycloneInfo[cycloneInfo.length-1].seasonYear)
+                        yearscount.push(cycloneInfo.length)
+                    }
+                    else{
                     for(var i=0;i<cycloneInfo.length;i++)
                     {
                         if(i==0)
                         {
                             years.push(cycloneInfo[i].seasonYear)
                             tempyearscount++
-        //                            console.debug("[Debug]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
+//                                    console.debug("[Debug]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
                         }
                         else
                         {
@@ -621,17 +633,18 @@ Component {
                             else // different year
                             {
                                 yearscount.push(tempyearscount)
-                                tempyearscount=0
+                                tempyearscount=1 //03102016 fix the issue
 //                                console.debug("[Debug3]year:["+cycloneInfo[i].seasonYear+"]\tcount:[]"+tempyearscount+"]\n")
                                 years.push(cycloneInfo[i].seasonYear)
                             }
                             if(i===cycloneInfo.length-1) //the last item
                             {
                                 yearscount.push(tempyearscount)
-                                tempyearscount=0
+//                                tempyearscount=0
 //                                console.debug("[Debug4]year:["+cycloneInfo[i].seasonYear				+"]\tcount:[]"+tempyearscount+"]\n")
                             }
                         }
+                    }
                     }
                     //update
 //                    cvCleanFlag=true
