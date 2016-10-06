@@ -16,13 +16,13 @@ public:
     explicit Controls(QObject  *parent = 0);
     Q_INVOKABLE  void onHello();
     Q_INVOKABLE  void setEngine(QQmlApplicationEngine *engine);
-
+    QString resrtucturePara(const QVariant &multiplePara);
 signals:
     void setTextField(QVariant text);
 
 private:
      QQmlApplicationEngine* _engine;
-     QString Controls::resrtucturePara(const QVariant &multiplePara);
+
 public
 
 

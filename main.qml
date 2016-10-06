@@ -869,6 +869,7 @@ Component {
                         selectingArea.push(lat1, lng1, lat2,lng2)
                         doSearch()
                         areaSelectMode=false
+                        areaSearchCheck(areaSelectMode)//06102016 fix bug - doubleClicked not work
                         // 29092016 [E] var for searching
                         dragRect.x = 0
                         dragRect.y = 0
