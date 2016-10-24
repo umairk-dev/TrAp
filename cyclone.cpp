@@ -34,6 +34,10 @@ QString Cyclone::getSource() const
     return source;
 }
 
+QString Cyclone::getCType() const
+{
+    return ctype;
+}
 
 QVariantList Cyclone::getTracks() const
 {
@@ -76,6 +80,11 @@ void Cyclone::setNum(const QString &n)
 }
 
 
+
+void Cyclone::setCType(const QString &n)
+{
+    ctype = n;
+}
 
 
 

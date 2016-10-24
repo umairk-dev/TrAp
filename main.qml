@@ -1,8 +1,7 @@
-import QtQuick 2.7
+import QtQuick 2.5
 import QtCharts 2.1
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
-import QtWebView 1.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
@@ -24,6 +23,8 @@ ApplicationWindow  {
     property bool isSearchScreen: false
     property bool isReportScreen: false
     property bool isFilterScreen: false
+    property bool isPredictScreen: false
+
     // 26092016 [S] ChartView show after search
     //property bool isChartConfigScreen: false
     property bool isChartScreen: false
@@ -36,6 +37,8 @@ ApplicationWindow  {
 
     property var dir: ["MDPI","HDPI","XHDPI","XXHDPI",
                                         "XXXHDPI","XXXXHDPI"]
+
+    property bool predictAreaSel: false
 // 14092016 [S] new search mechanism
     property variant searchType //year, wind
     property variant searchPara //2016,
@@ -56,6 +59,14 @@ ApplicationWindow  {
     // 29092016 [S] var for searching
     property var serchingitem: ['year','wind','pressure','area','country']
     property var selectingArea: []
+
+
+    //Prediction Paramerters
+    property var modelID: 1
+    property var _update: 1000
+    property var _burnin: 1000
+
+
     // 29092016 [E] var for searching
     readonly property int ppiRange:{
      if (ppi>=540)
@@ -157,6 +168,9 @@ ApplicationWindow  {
     /*****************************************/
 
     //signals
+    signal updateModel(string model, variant data, string modelID);
+    signal updateElLa();
+    signal updateLocalDB()
     signal submitTextField(string text)
     signal searchByName(string name)
     signal searchByYear(string year)
@@ -164,12 +178,14 @@ ApplicationWindow  {
     signal searchByYears(string yearFrom, string yearTo)
     signal searchByPressure(string pressureFrom, string pressureTo)
     signal searchByArea(string lat1, string lng1, string lat2, string lng2)
+    signal predictCyclones(string lat1, string lng1, string lat2, string lng2, string modleID, string burnin, string update)
     // 29092016 [S] search by multiple parameter
     signal searchByMultiPara(variant multisearchpara)
     // 29092016 [E] search by multiple parameter
     signal generateReport(string path, variant cyclones)
     signal controlMapMouse(bool status);
     signal clearMap();
+    signal getModelList();
 
     //  signal sendWebView(WebEngineView view)
 
@@ -319,6 +335,8 @@ ApplicationWindow  {
     }
     // 14092016 [E] new search mechanism
     // 19092016 [S] area selection
+
+
     function areaSearchCheck(cbStatus)
     {
         controlMapMouse(cbStatus)
@@ -329,14 +347,14 @@ ApplicationWindow  {
 
     Menu {
         id: menuFile
-        title: qsTr("&File")
+        title: qsTr("&Settings")
         MenuItem {
-            text: qsTr("&Open")
-            onTriggered: submitTextField("hello")
+            text: qsTr("&Update Local DB")
+            onTriggered: updateLocalDB();
         }
         MenuItem {
-            text: qsTr("E&xit")
-            onTriggered: Qt.quit();
+            text: qsTr("Update ElNino LaNina")
+            onTriggered: updateElLa();
         }
     }
 
@@ -426,10 +444,48 @@ ApplicationWindow  {
 
                 }
                 ToolButton {
-
+                    visible: {if(window._platform == "2") return true;
+                                else
+                                    return false;
+                        }
                     iconSource: "./images/" + dir[ppiRange] +"/setting.png"
                     onClicked: menuFile.popup()
                 }
+
+                ToolButton {
+                    visible: {if(window._platform == "2") return true;
+                                else
+                                    return false;
+                        }
+                   // iconSource: "./images/" + dir[ppiRange] +"/setting.png"
+                    text : "Prediction"
+                    onClicked: {
+                        if(window.isPredictScreen === false){
+                             if(window.isSearchScreen !== false){
+                                  window.isSearchScreen = false;
+                                  stack.pop();
+                             }
+                             if(window.isReportScreen !== false){
+                                window.isReportScreen = false;
+                                 stack.pop();
+                             }
+
+                             window.isPredictScreen = true;
+                             stack.push(predictView);
+                             txtInfo.text = "";
+                        }else{
+                            window.isPredictScreen = false;
+                            stack.pop();
+                        }
+
+                        //predictAreaSel = true;
+                        //areaSelectMode = true;
+                        //areaSearchCheck(areaSelectMode);
+
+
+                    }
+                }
+
                 ToolButton {
                     text: "About"
                    //iconSource: "save-as.png"
@@ -531,6 +587,10 @@ Component {
             zoomLevel: 4
 
             property variant cyclones : []
+
+            function showStatus(msg){
+                txtInfo.text = msg;
+            }
 
             function clearMap(){
                 map.clearMapItems();
@@ -867,9 +927,15 @@ Component {
                         // 29092016 [E] var for searching
 //                            console.debug("[dbg][mouse postition]")
                         selectingArea.push(lat1, lng1, lat2,lng2)
-                        doSearch()
                         areaSelectMode=false
-                        areaSearchCheck(areaSelectMode)//06102016 fix bug - doubleClicked not work
+
+                        if(predictAreaSel === true){
+                            predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update)
+                            predictAreaSel = false
+                        }else{
+                            doSearch()
+                            areaSearchCheck(areaSelectMode)//06102016 fix bug - doubleClicked not work
+                        }
                         // 29092016 [E] var for searching
                         dragRect.x = 0
                         dragRect.y = 0
@@ -944,6 +1010,17 @@ Component {
     }
 
 }
+
+    Component {
+        id: predictView
+        PredictionView {
+            id: pView
+
+
+        }
+    }
+
+
     Component {
             id: searchingView
             Searching {

@@ -102,8 +102,10 @@ Rectangle {
 
         for(var i = 0; i < cyclones.length; i++){
             var track = window.mapView.cyclones[i];
-            cycloneModel.get(0).cdata.append({name : cyclones[i].cycloneName, serial : "S#:"+cyclones[i].num, year : "Y:"+cyclones[i].seasonYear, cstate : track[3] , index : i })
-       }
+            cycloneModel.get(0).cdata.append({name : cyclones[i].cycloneName, serial : "S#:"+cyclones[i].num, year : "Y:"+cyclones[i].seasonYear, cstate : track[3] , index : i });
+
+
+        }
     }
 
 

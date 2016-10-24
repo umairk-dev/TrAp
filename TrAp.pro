@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick webview widgets sql core charts
+QT += qml quick widgets sql core charts
 CONFIG += c++11
 
 SOURCES += main.cpp \
@@ -8,7 +8,15 @@ SOURCES += main.cpp \
     cyclonetrack.cpp \
     cyclone.cpp \
     utils.cpp \
-    dbmanager.cpp
+    dbmanager.cpp \
+    prediction.cpp \
+    settings.cpp \
+    dbupdate.cpp \
+    predictionthread.cpp \
+    ella.cpp \
+    UpdateThread.cpp \
+    model.cpp \
+    variable.cpp
 
 RESOURCES += qml.qrc
 
@@ -33,7 +41,11 @@ DISTFILES += \
     android/build.gradle \
     android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew.bat \
-    .gitignore
+    .gitignore \
+    TrAp.pro.user.tP1924 \
+    README.md \
+    android/gradle.properties \
+    android/local.properties
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
@@ -42,4 +54,16 @@ HEADERS += \
     cyclonetrack.h \
     cyclone.h \
     utils.h \
-    dbmanager.h
+    dbmanager.h \
+    prediction.h \
+    settings.h \
+    dbupdate.h \
+    predictionthread.h \
+    ella.h \
+    UpdateThread.h \
+    model.h \
+    variable.h
+
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

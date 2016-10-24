@@ -5,7 +5,7 @@
 #include <QObject>
 #include <qfile.h>
 
-
+#include "dbmanager.h"
 #include "cyclone.h"
 #include "cyclonetrack.h"
 Controls::Controls(QObject  *parent) : QObject (parent)
@@ -39,10 +39,8 @@ void Controls::searchCycloneByName(const QString &name)
 
      //  QUrl url("http://smarttechsoft.com/trap/index.php?type=cname&name=" + name );
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyname&key="+ name +"&_format=json&source=2");
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+       nam->get(QNetworkRequest(url));
 
-
-      // emit setTextField(in.toUpper());
 }
 
 
@@ -56,7 +54,10 @@ void Controls::searchCycloneByArea(const QString &lat1, const QString &lng1,cons
 //       "http://smarttechsoft.com/trap/index.php?type=area&lat=" + lat +"&lng=" + lng + "&radius=" + radius
 
        QUrl url( "http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyregion&latfrom="+lat1+"&lntfrom="+lng1+"&latto="+lat2+"&lntto="+lng2);
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+
+       qDebug() << url;
+
+       nam->get(QNetworkRequest(url));
 
       // emit setTextField(in.toUpper());
 }
@@ -71,7 +72,7 @@ void Controls::searchCycloneByYear(const QString &year)
 //       QUrl url("http://smarttechsoft.com/trap/index.php?type=cyear&year=" + year );
 
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyyear&key="+ year +"&_format=json&source=2");
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+       nam->get(QNetworkRequest(url));
 }
 
 
@@ -83,7 +84,7 @@ void Controls::searchCycloneByWind(const QString &windFrom, const QString &windT
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbywind&windfrom="+ windFrom +"&windto="+windTo+"&_format=json&source=2");
 //       qDebug() << url;
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+       nam->get(QNetworkRequest(url));
 }
 
 void Controls::searchCycloneByYears(const QString &yearFrom,const QString &yearTo)
@@ -93,7 +94,7 @@ void Controls::searchCycloneByYears(const QString &yearFrom,const QString &yearT
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyyears&yearfrom="+yearFrom+"&yearto="+ yearTo +"&_format=json&source=2");
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+       nam->get(QNetworkRequest(url));
 }
 
 
@@ -104,7 +105,7 @@ void Controls::searchCycloneByPressure(const QString &pressureFrom,const QString
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbypressure&pressurefrom="+pressureFrom+"&pressureto="+ pressureTo +"&_format=json&source=2");
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
+       nam->get(QNetworkRequest(url));
 }
 
 QString Controls::resrtucturePara(const QVariant &multiplePara)
@@ -152,8 +153,8 @@ void Controls::searchCycloneByMultiPara(const QVariant &multiplePara)
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchall"+sPara);
-       QNetworkReply* reply = nam->get(QNetworkRequest(url));
-
+       nam->get(QNetworkRequest(url));
+        qDebug() << url;
 }
 
 void Controls::clearMap()
@@ -284,7 +285,7 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
                         QString pressure = objT["pressure"].toString();
 
                         CycloneTrack * tracks = new CycloneTrack;
-                        tracks->setCycloneID(obj["cyclone"].toString());
+                        tracks->setCycloneID(objT["cyclone"].toString());
                         tracks->setTrackID(id.toInt());
                         tracks->setLongitude(lng.toDouble());
                         tracks->setLatitude(lat.toDouble());
@@ -352,6 +353,35 @@ void Controls::delay()
 
 
 
+void Controls::getModelList(){
+
+    DbManager db= DbManager::get();
+    db.setEngine(_engine);
+    db.getModelList();
+}
+
+
+void Controls::updateModel(const QString& model, const QVariant& data, const QString& modelID){
+
+    DbManager db  = DbManager::get();
+
+    Model * m = new Model;
+    m->setModelData(model);
+    m->setModelID(modelID);
+    db.updateModel(m);
+
+    QList<QVariant> list = data.toList();
+    for(int i=0; i < list.length(); i++){
+        QList<QVariant> dataList = list.at(i).toList();
+        Variable * var = new Variable;
+        var->setDataName(dataList.at(0).toString());
+        var->setDataValue(dataList.at(1).toString());
+        var->setDataID(dataList.at(2).toInt());
+        db.updateData(var, modelID.toInt());
+ //       qDebug() << list.at(i)<<endl;
+    }
+
+}
 
 
 

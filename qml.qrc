@@ -49,5 +49,7 @@
         <file>images/XHDPI/filter_selected.png</file>
         <file>images/XXHDPI/filter_selected.png</file>
         <file>images/XXXHDPI/filter_selected.png</file>
+        <file>PredictionView.qml</file>
+        <file>ModelEditView.qml</file>
     </qresource>
 </RCC>

@@ -1,6 +1,5 @@
 #include <QApplication>//<QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QtWebView/QtWebView>
 #include <QQmlContext>
 #include "controls.h"
 #include <QQuickWindow>
@@ -12,22 +11,32 @@
 #include "cyclone.h"
 #include "utils.h"
 #include "dbmanager.h"
+#include "prediction.h"
+#include "dbupdate.h"
+#include "model.h"
+#include "variable.h"
 
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
 #else
 #define Q_OS_DESKTOP
 #endif
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv); //QGuiApplication app(argc, argv);123
+
+    qDebug()<< app.applicationDirPath();
+
     qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
-
-    QtWebView::initialize();
+    qmlRegisterType<Model>("Model", 1,0, "Model");
+    qmlRegisterType<Variable>("Variable", 1,0, "Variable");
+   // signal(SIGSEGV, handler);   // install our handler
+    DBUpdate dbupdate;
     Controls control;
-    DbManager db;
+    DbManager db = DbManager::get();
     Utils utils;
-
+    Prediction prediction;
    // qmlRegisterType(Cyclone);
     QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 21082016
     QScreen * screen = app.primaryScreen();
@@ -36,10 +45,10 @@ int main(int argc, char *argv[])
 
 
     QQmlApplicationEngine engine;
-    control.setEngine(&engine);
 
 
     QQmlContext *context = engine.rootContext();
+
     //For android*****************
     #ifdef  Q_OS_MOBILE
    /* QString helpHTMLFile = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
@@ -77,10 +86,28 @@ int main(int argc, char *argv[])
     QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
 
 
+    QObject::connect(window, SIGNAL(updateModel(QString,QVariant,QString)),
+    &control, SLOT(updateModel(QString,QVariant,QString)));
+
+
+
     // connect our QML signal to our C++ slot
     QObject::connect(window, SIGNAL(submitTextField(QString)),
     &control, SLOT(handleSubmitTextField(QString)));
 
+
+    // connect our QML signal to our C++ slot
+    QObject::connect(window, SIGNAL(updateElLa()),
+      &dbupdate, SLOT(updateElLa()));
+
+
+    // connect our QML signal to our C++ slot
+    QObject::connect(window, SIGNAL(updateLocalDB()),
+    &dbupdate, SLOT(checkVersion()));
+
+
+    QObject::connect(window, SIGNAL(getModelList()),
+    &control, SLOT(getModelList()));
 
 
     //search signal  - by Name
@@ -104,6 +131,9 @@ int main(int argc, char *argv[])
     QObject::connect(window, SIGNAL(searchByPressure(QString,QString)),
     &control, SLOT(searchCycloneByPressure(QString,QString)));
 
+    //search signal  - Predict Cyclones
+    QObject::connect(window, SIGNAL(predictCyclones(QString,QString,QString,QString,QString,QString,QString)),
+    &prediction, SLOT(predictCyclones(QString,QString,QString,QString,QString,QString,QString)));
 
     //search signal  - by Area
     QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString,QString)),
@@ -127,43 +157,15 @@ int main(int argc, char *argv[])
     &control, SLOT(generateReport(QString,QVariant)));
 
 
-    //search signal
-    //QObject::connect(window, SIGNAL(sendWebView(QWebEngineView)),
-    //&control, SLOT(getWebView(QWebEngineView)));
-
-
-
     //connect c++ to qml for sending data
     QObject::connect(&control, SIGNAL(setTextField(QVariant)),
     window, SLOT(setTextField(QVariant)));
 
 
-    //show track info
-  //  QObject::connect(&utils, SIGNAL(showTrackInfo(QVariant, QVariant, QVariant)),
-   // window, SLOT(showTrackInfo(QVariant, QVariant, QVariant)));
-
-
-    QObject *webView = engine.rootObjects().at(0)->findChild<QObject*>("map");
-    if(webView)
-      {
-          qDebug() << "found";
-
-        //  if(!QMetaObject::invokeMethod(webView, "zoomIn"))
-       //       qDebug() << "Failed to invoke push";
-          //QQmlComponent component(&engine, QStringLiteral("qrc:/Searching.qml"));
-          //QObject *object = component.create();
-          //QVariant arg = QVariant::fromValue(object);
-
-          //if(!QMetaObject::invokeMethod(stackView, "push",
-              //                          Q_ARG(QVariant, arg)))
-            //  qDebug() << "Failed to invoke push";
-      }else{
-
-        qDebug() << "notfound";
-
-    }
-
-
+    control.setEngine(&engine);
+    dbupdate.setEngine(&engine);
+    db.setEngine(&engine);
+    prediction.setEngine(&engine);
 
     return app.exec();
 }

@@ -39,9 +39,9 @@ public
      void searchCycloneByMultiPara(const QVariant& multiplePara);
      void searchCycloneServiceFinished(QNetworkReply* reply);
      void generateReport(const QString &path, const QVariant &cyclones);
+     void getModelList();
 
-      //void getWebView(QWebEngineView * view);
-
+     void updateModel(const QString& model, const QVariant& data, const QString& modelID);
 };
 
 #endif // CONTROLS_H

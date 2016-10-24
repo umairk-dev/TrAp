@@ -13,6 +13,7 @@ class Cyclone : public QObject
     Q_PROPERTY(QString seasonYear READ getSeasonYear WRITE setSeasonYear)
     Q_PROPERTY(QString num READ getNum WRITE setNum)
     Q_PROPERTY(QString source READ getSource WRITE setSource)
+    Q_PROPERTY(QString ctype READ getCType WRITE setCType)
     Q_PROPERTY(QVariantList tracks READ getTracks WRITE setTracks)
 
 public:
@@ -23,6 +24,7 @@ public:
     QVariantList getTracks() const;
     QString getSource() const;
     QString getNum() const;
+    QString getCType() const;
 
     void setCycloneName(const QString &);
     void setCycloneID(const QString &);
@@ -30,6 +32,7 @@ public:
     void setTracks(const QVariantList &);
     void setSource(const QString &);
     void setNum(const QString &);
+    void setCType(const QString &);
 
 private:
         QString cycloneName;
@@ -37,10 +40,10 @@ private:
         QString seasonYear;
         QString source;
         QString num;
+        QString ctype;
         QVariantList tracks;
-signals:
-
 public slots:
+     
 };
 
 //Q_DECLARE_METATYPE(Cyclone);
