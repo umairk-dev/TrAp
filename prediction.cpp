@@ -63,17 +63,37 @@ void Prediction::doPrdiction(int year)
 
 
    QObject * mapView = engine->rootObjects().at(0)->findChild<QObject*>("map");
-   QString msg = "updating cyclones..";
+   QString msg = "Processing..";
 
+   int count = 0;
    QString str;
    if(fptr!=NULL){
         while(1){
             c = fgetc(fptr);
             if(c=='\n'){
+                
+                
                 msg = str;
                 if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
                     qDebug() << "Failed to invoke showStatus";
                 qDebug() << str;
+                if(str == "\nCODA files written"){
+                    count++;    
+
+                    if(count>1){
+                        if(mapView && !QMetaObject::invokeMethod(mapView, "onModelGenerated"))
+                            qDebug() << "Failed to invoke onModelGenerated";
+                        else
+                            qDebug() << "not found";
+
+                    }
+                }else{
+                    qDebug() << " not match " << str;
+
+                }
+                
+
+                
                 str = "";
             }
 

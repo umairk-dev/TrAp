@@ -17,6 +17,7 @@ ApplicationWindow  {
     visible: true
     visibility: "Maximized"
     id : window
+    objectName: "main"
     property bool isSearching: false
     property string info : ""
     property string _platform: platform
@@ -127,8 +128,9 @@ ApplicationWindow  {
              x : 20
              y : 60
              z : 70
-
+             font.pointSize : 12
              id: txtInfo
+
              color : "white"
          }
 
@@ -164,6 +166,8 @@ ApplicationWindow  {
         if(map !== undefined)
             return map.cyclones;
     }
+
+
 
     /*****************************************/
 
@@ -588,9 +592,36 @@ Component {
 
             property variant cyclones : []
 
+            /*********************************************
+            *   Open prediction window if nodel generated
+            **********************************************/
+
+            function onModelGenerated(){
+
+                txtInfo.text = "";
+                messageDialog.title = "Prediction"
+                messageDialog.text = "model generated successfully..";
+                messageDialog.open();
+
+                stack.push(testPredictModel);
+
+
+            }
+
+
+            /*************************************
+            *   Show Status
+            **************************************/
+
             function showStatus(msg){
                 txtInfo.text = msg;
             }
+
+
+
+            /*************************************
+            *   Clear cyclones from map
+            **************************************/
 
             function clearMap(){
                 map.clearMapItems();
@@ -603,18 +634,39 @@ Component {
                 txtResultCount.text = ""
             }
 
+
+
+            /**************************************************
+            *   Enable mouse on map after region selection
+            *************************************************/
+
             function enableMouse(){
                 mapMouseArea.enabled = true;
             }
 
 
+
+            /***********************************************
+            *   Disable mouse on map before region selection
+            ***********************************************/
+
             function disableMouse(){
                 mapMouseArea.enabled = false;
             }
 
+
+            /*************************************
+            *   Show Report generation status
+            **************************************/
+
             function reportGenerated(msg){
                 txtInfo.text = msg;
             }
+
+
+            /*************************************
+            *   Display error message and clear memory
+            **************************************/
 
             function searchError(){
 //                cbSelectArea.checked = false;
@@ -631,6 +683,12 @@ Component {
                 map.cyclones = [];
                 map.clearMapItems();
             }
+
+
+
+            /*****************************************************
+            *   Display message no cyclone found and clear memory
+            *****************************************************/
 
             function noResult(){
 //                cbSelectArea.checked = false;
@@ -1010,6 +1068,14 @@ Component {
     }
 
 }
+
+
+    Component {
+        id: testPredictModel
+        TestPredictionModel {
+
+        }
+    }
 
     Component {
         id: predictView

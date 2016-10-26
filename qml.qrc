@@ -51,5 +51,6 @@
         <file>images/XXXHDPI/filter_selected.png</file>
         <file>PredictionView.qml</file>
         <file>ModelEditView.qml</file>
+        <file>TestPredictionModel.qml</file>
     </qresource>
 </RCC>

@@ -101,15 +101,6 @@ ApplicationWindow {
                                         }
 
 
-                                        Button{
-                                            Layout.topMargin: 10
-                                            Layout.leftMargin: 10
-                                            Layout.rightMargin: 10
-                                            onClicked: {
-
-                                            }
-                                        }
-
                                     }
                                 }
                             }

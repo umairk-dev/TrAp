@@ -62,7 +62,8 @@ HEADERS += \
     ella.h \
     UpdateThread.h \
     model.h \
-    variable.h
+    variable.h \
+    Rmath.h
 
 
 INCLUDEPATH += $$PWD/.

@@ -205,10 +205,10 @@ Rectangle {
 
                         window._update = txtUpdate.text;
                         window._burnin = txtBurnin.text;
-
+                        txtInfo.text = "Select Area to start generatig model.."
                         areaSearchCheck(areaSelectMode);
-                        //window.isPredictScreen = false;
-                       // stack.pop()
+                        window.isPredictScreen = false;
+                        stack.pop()
                     }
                 }
             }
