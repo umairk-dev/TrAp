@@ -449,15 +449,15 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
 
     QDateTime local(QDateTime::currentDateTime());
     int current = local.toString("yyyy").toInt();
-    QString cycloneSql = "SELECT cycloneID, seasonYear FROM Cyclone WHERE seasonYear BETWEEN 1950 AND " + QString::number(current);
+    QString cycloneSql = "SELECT cycloneID, seasonYear FROM Cyclone WHERE seasonYear BETWEEN 1970 AND " + QString::number(current);
 
-    QString msg = "Searching cyclones in selected region from 1950 to " + QString::number(current);
+    QString msg = "Searching cyclones in selected region from 1970 to " + QString::number(current);
     if(!QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
         qDebug() << "Failed to invoke showStatus";
     int count = 0;
 
     QHash<QString, int> yearsCount;
-    for(int i = 1950; i <= current; i++ ){
+    for(int i = 1970; i <= current; i++ ){
         yearsCount.insert(QString::number(i), 0);
     }
 
@@ -521,7 +521,7 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
                      yearsCount[year] = yearsCount.value(year) + 1;
                      count++;
 
-                     QString msg = "Searching cyclones in selected region from 1950 to " + QString::number(current);
+                     QString msg = "Searching cyclones in selected region from 1970 to " + QString::number(current);
                      msg.append("\n Found: " + QString::number(count));
                      if(!QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
                          qDebug() << "Failed to invoke showStatus";

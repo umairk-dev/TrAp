@@ -135,14 +135,14 @@ void Prediction::generateData(){
     int current = local.toString("yyyy").toInt();
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream stream(&file);
-        int year = 1950;
+        int year = 1970;
         stream <<"y[]	Nino34[]"<< '\n';//	TNI[]
 
         for(int i = 0;i<list.size(); i++){
          //  if(year == current)
          //      stream <<"NA"<<"	"<<list.at(i)->getValue()<<'\n';//<<"	0"
          //   else
-               stream <<yearsCount[QString::number(year)]<<"	"<<list.at(i)->getValue()<< '\n';//<<"	0"<< '\n';
+              stream <<yearsCount[QString::number(year)]<<"	"<<list.at(i)->getValue()<< '\n';//<<"	0"<< '\n';
            year++;
         }
         stream <<"END";
@@ -270,7 +270,7 @@ void Prediction::initYearCount(){
     QDateTime local(QDateTime::currentDateTime());
     int current = local.toString("yyyy").toInt();
 
-    for(int i = 1950; i <= current; i++ ){
+    for(int i = 1970; i <= current; i++ ){
         yearsCount.insert(QString::number(i), 0);
     }
 }
