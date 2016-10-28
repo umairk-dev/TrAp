@@ -13,6 +13,10 @@ QString Model::getModelData() const{
     return modelData;
 }
 
+QString Model::getModelEquation() const{
+    return modelEquation;
+}
+
 QString Model::getModelID() const{
     return modelID;
 }
@@ -24,6 +28,11 @@ void Model::setModelName(const QString & name){
 void Model::setModelData(const QString & data){
     modelData = data;
 }
+
+void Model::setModelEquation(const QString & equation){
+    modelEquation = equation;
+}
+
 
 void Model::setModelID(const QString & id){
     modelID = id;

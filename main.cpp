@@ -15,6 +15,8 @@
 #include "dbupdate.h"
 #include "model.h"
 #include "variable.h"
+#include "plotpoint.h"
+#include "presult.h"
 
 #if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
 #define Q_OS_MOBILE
@@ -31,6 +33,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<Cyclone>("Cyclone", 1,0, "Cyclone");
     qmlRegisterType<Model>("Model", 1,0, "Model");
     qmlRegisterType<Variable>("Variable", 1,0, "Variable");
+    qmlRegisterType<PlotPoint>("PlotPoint", 1,0, "PlotPoint");
+    qmlRegisterType<PResult>("PResult", 1,0, "PResult");
+
    // signal(SIGSEGV, handler);   // install our handler
     DBUpdate dbupdate;
     Controls control;
@@ -132,8 +137,14 @@ int main(int argc, char *argv[])
     &control, SLOT(searchCycloneByPressure(QString,QString)));
 
     //search signal  - Predict Cyclones
-    QObject::connect(window, SIGNAL(predictCyclones(QString,QString,QString,QString,QString,QString,QString)),
-    &prediction, SLOT(predictCyclones(QString,QString,QString,QString,QString,QString,QString)));
+    QObject::connect(window, SIGNAL(predictCyclones(QString,QString,QString,QString,QString,QString,QString,QString)),
+    &prediction, SLOT(predictCyclones(QString,QString,QString,QString,QString,QString,QString,QString)));
+
+
+    //search signal  - Backcast
+    QObject::connect(window, SIGNAL(doBackcast()),
+    &prediction, SLOT(doBackcast()));
+
 
     //search signal  - by Area
     QObject::connect(window, SIGNAL(searchByArea(QString,QString,QString,QString)),

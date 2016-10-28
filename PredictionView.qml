@@ -4,12 +4,17 @@ import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
+import QtQml 2.2
+
+import QtQuick.Controls 2.0
+import QtQuick.Controls 1.4
 import Model 1.0
 Rectangle {
 
     objectName: "predictView"
     property var modelList
     property var models
+    property var ellaList : ["DJF", "JFM","FMA", "MAM", "AMJ","MJJ","JJA", "JAS","ASO","SON","OND", "NDJ"]
     color : "transparent"
 
     function loadModels(_models){
@@ -125,19 +130,53 @@ Rectangle {
                 spacing : 20
                 width:200
                 Label{
-                    text: "Initial Values:"
+                    text: "Nino Season:"
                     color: "white"
                     font.pixelSize: 12
                 }
             }
             ColumnLayout {
-                TextField{
-                    id: initData
-                    width:100
+                ComboBox {
+                     id: cbElNinoLaNina
+                     model: ellaList
+                     currentIndex: 5
                 }
             }
         }
 
+
+
+        RowLayout{
+            ColumnLayout {
+                Layout.leftMargin: 10
+                Layout.topMargin: 10
+                spacing : 20
+                width:200
+                Text {
+                    id: txtYear
+                    color: "white"
+                    font.pixelSize: 12
+                    text: qsTr("Training: From:["+ parseInt(rsYear.first.value)+"] to:["+parseInt(rsYear.second.value)+"]")
+                }
+            }
+
+            ColumnLayout {
+                Layout.leftMargin: 10
+                Layout.topMargin: 10
+                spacing : 20
+                width:300
+                RangeSlider{
+                    id: rsYear
+                    Layout.topMargin: 10
+                    Layout.leftMargin: 10
+                    from: 1970
+                    to:Qt.formatDateTime(new Date(), "yyyy")
+                    first.value: 1970
+                    second.value: parseInt(Qt.formatDateTime(new Date(), "yyyy") ) - 1
+                    stepSize: 1.0
+                }
+            }
+        }
 
         RowLayout{
             ColumnLayout {
@@ -205,6 +244,7 @@ Rectangle {
 
                         window._update = txtUpdate.text;
                         window._burnin = txtBurnin.text;
+                        window._elSeason = cbElNinoLaNina.currentIndex + 1;
                         txtInfo.text = "Select Area to start generatig model.."
                         areaSearchCheck(areaSelectMode);
                         window.isPredictScreen = false;
@@ -227,7 +267,7 @@ Rectangle {
                     }
                 }
             }
-    }
+        }
 
 
     }

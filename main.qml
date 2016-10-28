@@ -8,6 +8,8 @@ import QtQuick.Dialogs 1.2
 import Cyclone 1.0
 import QtLocation 5.5
 import QtPositioning 5.3
+import PlotPoint 1.0
+import PResult 1.0
 
 ApplicationWindow  {
     title: "TrAp - FedUni Project"
@@ -66,6 +68,7 @@ ApplicationWindow  {
     property var modelID: 1
     property var _update: 1000
     property var _burnin: 1000
+    property var _elSeason: 5
 
 
     // 29092016 [E] var for searching
@@ -182,7 +185,7 @@ ApplicationWindow  {
     signal searchByYears(string yearFrom, string yearTo)
     signal searchByPressure(string pressureFrom, string pressureTo)
     signal searchByArea(string lat1, string lng1, string lat2, string lng2)
-    signal predictCyclones(string lat1, string lng1, string lat2, string lng2, string modleID, string burnin, string update)
+    signal predictCyclones(string lat1, string lng1, string lat2, string lng2, string modleID, string burnin, string update, string elSeason)
     // 29092016 [S] search by multiple parameter
     signal searchByMultiPara(variant multisearchpara)
     // 29092016 [E] search by multiple parameter
@@ -190,6 +193,7 @@ ApplicationWindow  {
     signal controlMapMouse(bool status);
     signal clearMap();
     signal getModelList();
+    signal doBackcast();
 
     //  signal sendWebView(WebEngineView view)
 
@@ -493,7 +497,7 @@ ApplicationWindow  {
                 ToolButton {
                     text: "About"
                    //iconSource: "save-as.png"
-                    onClicked:  stack.push(resultFilterView)//console.log(dir[ppiRange])
+                    onClicked:  stack.push(submitTextField("hello"))//console.log(dir[ppiRange])
 
                 }
 
@@ -591,6 +595,19 @@ Component {
             zoomLevel: 4
 
             property variant cyclones : []
+
+            /*********************************************
+            *   plot data
+            **********************************************/
+            function plotHindCastResult(data){
+               console.log(data);
+                for(var i = 0; i < data.length; i++){
+                    var points = data[i].result;
+                    for(var j = 0; j < points.length; j++)
+                        console.log(points[j].x + " , " + points[j].y);
+                }
+            }
+
 
             /*********************************************
             *   Open prediction window if nodel generated
@@ -988,7 +1005,7 @@ Component {
                         areaSelectMode=false
 
                         if(predictAreaSel === true){
-                            predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update)
+                            predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update, _elSeason)
                             predictAreaSel = false
                         }else{
                             doSearch()

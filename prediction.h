@@ -17,11 +17,16 @@ public:
     Q_INVOKABLE  void setEngine(QQmlApplicationEngine *engine);
 
     Q_INVOKABLE  QQmlApplicationEngine * getEngine();
+
+    QString _modelID;
+    QString _burnIn;
+    QString _update;
+    QString _elSeason;
 signals:
 
 public slots:
     void searchServiceFinished(QNetworkReply* reply);
-    void predictCyclones(const QString &lat1, const QString &lng1,const QString &lat2, const QString &lng2, const QString& mid, const QString& burnin, const QString& update);
+    void predictCyclones(const QString &lat1, const QString &lng1,const QString &lat2, const QString &lng2, const QString& mid, const QString& burnin, const QString& update, const QString& elSeason);
 
 
     QHash<QString, int> getYearCount();
@@ -37,6 +42,8 @@ public slots:
     void setToLng(double lng);
     void generateData();
     void doPrdiction(int year);
+    void doBackcast();
+
 private:
     void predict(const QString& name);
     void initDir();
@@ -59,9 +66,6 @@ private:
     double toLat;
     double fromLng;
     double toLng;
-    QString _modelID;
-    QString _burnIn;
-    QString _update;
     QHash<QString, int> yearsCount;
     QQmlApplicationEngine *engine;
 };

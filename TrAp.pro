@@ -16,7 +16,11 @@ SOURCES += main.cpp \
     ella.cpp \
     UpdateThread.cpp \
     model.cpp \
-    variable.cpp
+    variable.cpp \
+    plotpoint.cpp \
+    mathexpr.cpp \
+    hindcastthread.cpp \
+    presult.cpp
 
 RESOURCES += qml.qrc
 
@@ -63,7 +67,11 @@ HEADERS += \
     UpdateThread.h \
     model.h \
     variable.h \
-    Rmath.h
+    Rmath.h \
+    plotpoint.h \
+    mathexpr.h \
+    hindcastthread.h \
+    presult.h
 
 
 INCLUDEPATH += $$PWD/.

@@ -22,7 +22,7 @@ class DbManager
 public:
 //    DbManager(QObject  *parent = 0);
     static DbManager &get();
-    QString getModel(QString mid);
+    Model * getModel(QString mid);
     void updateDB();
     void clearDB();
     int getVersion();
@@ -47,7 +47,8 @@ public:
     QString getDataList(int modelID);
     QStringList getMonitorList(int modelID);
     void updateData(Variable * data, int modelID);
-
+    QString getModelEquation(int modelID);
+    QString updateModelEquation(QString equ, int modelID);
 private:
     QSqlDatabase db;
 };

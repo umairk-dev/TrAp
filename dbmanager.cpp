@@ -27,34 +27,41 @@ DbManager::DbManager()
 
 }
 
-QString DbManager::getModel(QString mid){
-    QString model;
+Model * DbManager::getModel(QString mid){
+    Model * model = new Model;
 
     if(db.open()){
         QSqlQuery query(db);
-        query.exec("SELECT modelData FROM model WHERE modelID = " + mid);
+        query.exec("SELECT modelData, modelEquation FROM model WHERE modelID = " + mid);
         if (query.next()) {
-                model = query.value(0).toString();
+
+            model->setModelData(query.value("modelData").toString());
+            model->setModelEquation(query.value("modelEquation").toString());
         }
     }
     db.close();
     return model;
 }
 
- QList<ElLa*> DbManager::getElLa(int month){
+QList<ElLa*> DbManager::getElLa(int month){
     QList<ElLa*> list;
 
     if(db.open()){
-        QSqlQuery query(db);
-        query.exec("Select * from ElninoLanina WHERE month = "+QString::number(month)+ " ORDER BY year ASC");
-        while (query.next()) {
-            ElLa * ella = new ElLa;
-            ella->setYear(query.value("year").toInt());
-            ella->setMonth(query.value("month").toInt());
-            ella->setValue(query.value("value").toDouble());
-            ella->setColor(query.value("color").toString());
-            list.append(ella);
+        QSqlQuery * query = new QSqlQuery(db);
+        query->prepare("Select * from ElninoLanina WHERE month = "+QString::number(month)+ " ORDER BY year ASC");
+
+        if(query->exec() == true)
+        {
+            while (query->next()) {
+                ElLa * ella = new ElLa;
+                ella->setYear(query->value("year").toInt());
+                ella->setMonth(query->value("month").toInt());
+                ella->setValue(query->value("value").toDouble());
+                ella->setColor(query->value("color").toString());
+                list.append(ella);
+            }
         }
+        delete query;
     }
     db.close();
     return list;
@@ -185,7 +192,7 @@ void DbManager::createTblModel(){
         db.open();
 
     QSqlQuery query(db);
-    if (query.exec("CREATE TABLE IF NOT EXISTS model ( modelID INTEGER PRIMARY KEY AUTOINCREMENT, modelData TEXT, modelName TEXT);")) {
+    if (query.exec("CREATE TABLE IF NOT EXISTS model ( modelID INTEGER PRIMARY KEY AUTOINCREMENT, modelData TEXT, modelName TEXT, modelEquation TEXT);")) {
         qDebug() << "model table created";
 
         QString m = "";
@@ -200,8 +207,7 @@ void DbManager::createTblModel(){
         m.append("p ~ dunif(lower, upper) ");
         m.append("}'");
 
-        query.exec("INSERT INTO model ( modelData, modelName) VALUES ( "+m+", 'model 1');");
-
+        query.exec("INSERT INTO model ( modelData, modelName, modelEquation) VALUES ( "+m+", 'Poisson', 'beta0 + beta1 * Nino34[i]');");
 
 
         if (query.exec("CREATE TABLE IF NOT EXISTS modelVariable ( dataID INTEGER PRIMARY KEY AUTOINCREMENT, dataName TEXT, dataValue TEXT, modelID INTEGER, dataType TEXT);")) {
@@ -213,6 +219,7 @@ void DbManager::createTblModel(){
             query.exec("INSERT INTO modelVariable ( dataName,dataValue, modelID, dataType) VALUES ( 'beta1', '0', 1, '2');");
             query.exec("INSERT INTO modelVariable ( dataName,dataValue, modelID, dataType) VALUES ( 'p', '0.95', 1, '2');");
         }
+
     } else {
         qDebug() << "error Model table creation" << query.lastError();
     }
@@ -521,6 +528,7 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
                      yearsCount[year] = yearsCount.value(year) + 1;
                      count++;
 
+
                      QString msg = "Searching cyclones in selected region from 1970 to " + QString::number(current);
                      msg.append("\n Found: " + QString::number(count));
                      if(!QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
@@ -560,12 +568,13 @@ void DbManager::getModelList(){
         QVariantList models;
         if(query->exec() == true)
         {
-           // qDebug() << "track added";
+
             while (query->next()) {
                 Model *  model = new Model;
                 model->setModelID(query->value("modelID").toString());
                 model->setModelData(query->value("modelData").toString());
-                model->setModelName(query->value("modelName").toString());
+                model->setModelName(query->value("modelName").toString());             
+                model->setModelEquation(query->value("equation").toString());
 
                 QSqlQuery * query2 = new QSqlQuery(db);
                 query2->prepare("SELECT * FROM modelVariable WHERE modelID = " + query->value("modelID").toString() );
@@ -623,8 +632,6 @@ void DbManager::setEngine(QQmlApplicationEngine * engine){
     _engine = engine;
 }
 
-
-
 void DbManager::updateModel(Model * model){
     if(!db.isOpen()){
         db.open();
@@ -632,7 +639,7 @@ void DbManager::updateModel(Model * model){
 
     if(db.isOpen()){
         QSqlQuery * query = new QSqlQuery(db);
-        query->prepare("UPDATE model SET modelData = '"+model->getModelData()+"' WHERE modelID = " + model->getModelID() );
+        query->prepare("UPDATE model SET modelData = '"+model->getModelData()+"', ,modelEquation = '"+model->getModelEquation()+"' WHERE modelID = " + model->getModelID() );
         if(query->exec() == true){
             qDebug() << "model updated";
         }else{
@@ -710,19 +717,13 @@ QString DbManager::getInitList(int modelID){
        return "";
 }
 
-
 void DbManager::updateData(Variable * vdata, int modelID){
     if(!db.isOpen()){
         db.open();
     }
 
-
-
     if(db.isOpen()){
         QSqlQuery * query = new QSqlQuery(db);
-
-      //  modelVariable ( dataID INTEGER PRIMARY KEY AUTOINCREMENT, dataName TEXT, dataValue TEXT, modelID INTEGER, dataType TEXT
-     //   qDebug() << "UPDATE modelVariable SET dataName = '"+vdata->getDataName()+"', dataValue = '"+ vdata->getDataValue()+"' WHERE modelID = " + QString::number(modelID) + " AND dataName = '" + QString::number(vdata->getDataID())+"' " ;
 
         if(vdata->getDataName() == "N"){
             qDebug() << "UPDATE modelVariable SET dataValue = '"+ vdata->getDataValue()+"' WHERE modelID = " + QString::number(modelID) + " AND dataName = 'N' ";

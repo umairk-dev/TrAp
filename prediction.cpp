@@ -10,6 +10,9 @@
 #include "predictionthread.h"
 #include <QStringList>
 #include <signal.h>
+#include <math.h>
+#include "hindcastthread.h"
+
 Prediction::Prediction(QObject *parent) : QObject(parent)
 {
    /* QLibrary lib(QCoreApplication::applicationDirPath() + "/libOpenBUGS.dll");
@@ -67,6 +70,7 @@ void Prediction::doPrdiction(int year)
 
    int count = 0;
    QString str;
+   bool isOpen = false;
    if(fptr!=NULL){
         while(1){
             c = fgetc(fptr);
@@ -80,12 +84,16 @@ void Prediction::doPrdiction(int year)
                 if(str == "\nCODA files written"){
                     count++;    
 
-                    if(count>1){
+                    if(count>1 && !isOpen){
+                        msg = "";
+                        if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
+                            qDebug() << "Failed to invoke showStatus";
+
                         if(mapView && !QMetaObject::invokeMethod(mapView, "onModelGenerated"))
                             qDebug() << "Failed to invoke onModelGenerated";
                         else
                             qDebug() << "not found";
-
+                        isOpen = true;
                     }
                 }else{
                     qDebug() << " not match " << str;
@@ -130,7 +138,7 @@ void Prediction::generateData(){
     QFile file(dataFile);
     file.remove();
     DbManager db = DbManager::get();
-    QList<ElLa*> list = db.getElLa(6);
+    QList<ElLa*> list = db.getElLa(_elSeason.toInt());
     QDateTime local(QDateTime::currentDateTime());
     int current = local.toString("yyyy").toInt();
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -198,7 +206,7 @@ void Prediction::loadModel(QString mid){
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         DbManager db = DbManager::get();
-        stream << db.getModel(mid);
+        stream << db.getModel(mid)->getModelData();
     }
 
     //Check the model
@@ -239,7 +247,7 @@ void Prediction::initDir(){
 
 }
 
-void Prediction::predictCyclones(const QString &lat1, const QString &lng1,const QString &lat2, const QString &lng2, const QString& mid, const QString& burnin, const QString& update)
+void Prediction::predictCyclones(const QString &lat1, const QString &lng1,const QString &lat2, const QString &lng2, const QString& mid, const QString& burnin, const QString& update, const QString& elSeason)
 {
        qDebug() << "Predict";
        fromLat = lat1.toDouble();
@@ -249,6 +257,7 @@ void Prediction::predictCyclones(const QString &lat1, const QString &lng1,const 
        _modelID = mid;
        _update = update;
        _burnIn = burnin;
+       _elSeason = elSeason;
        loadModel(mid);
 
 
@@ -486,3 +495,13 @@ void Prediction::_CharArray(QString cmd, QString arg) {
     charArray(&c_cmd, &cmd_len, &c_arg, &arg_len, res_ptr);
     //buffer();
 }
+
+void Prediction::doBackcast(){
+
+    HindcastThread * hindcast = new HindcastThread(this);
+    hindcast->start();
+
+}
+
+
+

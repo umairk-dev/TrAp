@@ -8,6 +8,8 @@
 #include "dbmanager.h"
 #include "cyclone.h"
 #include "cyclonetrack.h"
+#include "mathexpr.h"
+
 Controls::Controls(QObject  *parent) : QObject (parent)
 {
 
@@ -25,6 +27,29 @@ void Controls::setEngine(QQmlApplicationEngine * engine){
 
 void Controls::handleSubmitTextField(const QString &in)
 {
+
+    // The number that the variable "x" will point to
+    double x;
+    // Creates a variable named "x" and which value will be x
+    RVar xvar ( "x" , &x );
+
+    // Asks for a fomula depending on the variable x, e.g. "sin 2x"
+    char * s= "x * 5 + x";
+   // printf("Enter a formula depending on the variable x:\n");
+   // gets(s);
+
+    // Creates an operation with this formula. The operation depends on one
+    // variable, which is xvar; the third argument is an array of pointers
+    // to variables; the previous argument is its size
+    RVar* vararray[1]; vararray[0]=&xvar;
+    ROperation op ( s, 1, vararray );
+
+    // Affects (indirectly) a value to xvar
+    x=3;
+    // Printfs the value of the formula for x=3;
+    qDebug() << "s = " << op.Expr() << "ex = " << op.Val() ;
+
+
     qDebug() << "c++: HandleTextField::handleSubmitTextField:" << in;
     emit setTextField(in.toUpper());
 }

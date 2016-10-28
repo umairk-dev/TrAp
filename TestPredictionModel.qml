@@ -81,10 +81,10 @@ Rectangle {
                 spacing : 20
                 Button{
                     id: btnSelect
-                    text:"Backcast"
+                    text:"Hindcast"
 
                     onClicked: {
-
+                        doBackcast();
                     }
                 }
             }

@@ -28,13 +28,4 @@ void PredictionThread::run()
 
     prediction->doPrdiction(2016);
 
-
-  //  std::string m = "C:/Users/umair/AppData/Local/Temp/m.txt";
-  //  LibControl * lc = new LibControl;
-  //  QString st = " -m 'C:/Users/umair/AppData/Local/Temp/m.txt'";
-  //  st.append(" -d 'C:/Users/umair/AppData/Local/Temp/d.txt'");
-  //  st.append(" -d 'C:/Users/umair/AppData/Local/Temp/d2.txt' -c 3000 ");
-  //  lc->processPrediction(st);
-  //  lc->_CmdInterpreter("BugsEmbed.SetFilePath('" + m + "');BugsEmbed.ParseGuard;BugsEmbed.Parse");
-
 }
