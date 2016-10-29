@@ -10,11 +10,11 @@ Rectangle {
     height: parent.height*0.25
     anchors.top :parent.top
     anchors.right: parent.right
-//    property bool clearflag:false
+    property variant cvtitle
     property variant categorieslist : [] // year...
     property variant categoriesvalues : []         // number of cyclone
-    property variant maxcycloneNo : []
-    property variant mincycloneNo : []
+    property variant rangeMax : []
+    property variant rangeMin : []
 
     Button {
          id: btnCVclose
@@ -71,7 +71,7 @@ Rectangle {
 
     ChartView {
         id: cvShow
-        title: "The number of cyclone in the year"
+        title: cvtitle
         width: parent.width*0.5
         height: parent.height*0.5
         anchors.top :parent.top
@@ -85,8 +85,8 @@ Rectangle {
         }
         ValueAxis{
              id: valueAxisY
-             min: mincycloneNo
-             max: maxcycloneNo
+             min: rangeMin
+             max: rangeMax
          }
         BarSeries {
             id: mySeries
@@ -101,8 +101,8 @@ Rectangle {
 //                mySeries.clear()
 //                categorieslist=[] // year...
 //                categoriesvalues=[]         // number of cyclone
-////                maxcycloneNo=[]
-////                mincycloneNo=[]
+////                rangeMax=[]
+////                rangeMin=[]
 //                console.debug("[debug clear]categoriesvalues:"+categoriesvalues.length+"\tlist:"+categorieslist.length)
 ////                clearflag=false
 //            }

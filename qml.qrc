@@ -52,5 +52,6 @@
         <file>PredictionView.qml</file>
         <file>ModelEditView.qml</file>
         <file>TestPredictionModel.qml</file>
+        <file>MyhistogramWindow.qml</file>
     </qresource>
 </RCC>

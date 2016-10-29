@@ -34,7 +34,8 @@ void Controls::handleSubmitTextField(const QString &in)
     RVar xvar ( "x" , &x );
 
     // Asks for a fomula depending on the variable x, e.g. "sin 2x"
-    char * s= "x * 5 + x";
+    char ts[]="x * 5 + x";
+    char * s= ts;
    // printf("Enter a formula depending on the variable x:\n");
    // gets(s);
 
@@ -163,6 +164,23 @@ QString Controls::resrtucturePara(const QVariant &multiplePara)
                 QVariantList areaList = list[i+1].toList();
 //                qDebug()<<"[Vince DBG3]area_size"<<wPara.size();
                 sPara+="&latfrom="+areaList[0].toString()+"&lntfrom="+areaList[1].toString()+"&latto="+areaList[2].toString()+"&lntto="+areaList[3].toString();
+            }
+            if(list[i]=="elstat")
+            {
+                //"LaNina","Neutral","ElNino"
+                if(paras[0]=="LaNina")
+                {
+                    sPara+="&ctype=LA";
+                }
+                else if(paras[0]=="ElNino")
+                {
+                    sPara+="&ctype=EL";
+                }
+                else
+                {
+                    sPara+="&ctype=NU";
+                }
+
             }
        }
        sPara+="&source=2&_format=json";

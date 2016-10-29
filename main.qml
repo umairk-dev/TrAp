@@ -60,8 +60,9 @@ ApplicationWindow  {
     property variant rangemin: []
     // 26092016 [E] var for bar chart
     // 29092016 [S] var for searching
-    property var serchingitem: ['year','wind','pressure','area','country']
+    property var serchingitem: ['year','wind','pressure','area','country','elstat']
     property var selectingArea: []
+    property var statuslist: ["LaNina","Neutral","ElNino"]
 
 
     //Prediction Paramerters
@@ -70,6 +71,7 @@ ApplicationWindow  {
     property var _burnin: 1000
     property var _elSeason: 5
 
+    property variant predictdataset: []
 
     // 29092016 [E] var for searching
     readonly property int ppiRange:{
@@ -600,12 +602,20 @@ Component {
             *   plot data
             **********************************************/
             function plotHindCastResult(data){
-               console.log(data);
+//               console.log(data);                
+                predictdataset = new Array(data.length)
                 for(var i = 0; i < data.length; i++){
                     var points = data[i].result;
-                    for(var j = 0; j < points.length; j++)
+                    var temp = new Array(points.length);
+                    for(var j = 0; j < points.length; j++){
                         console.log(points[j].x + " , " + points[j].y);
+                        temp[j] = points[j].y;
+                    }
+                    predictdataset[i]=temp
                 }
+                var component = Qt.createComponent("MyhistogramWindow.qml")
+                var myhisgwin    = component.createObject(window,{"predictionData":predictdataset});
+                myhisgwin.show();
             }
 
 
@@ -1001,11 +1011,13 @@ Component {
 //                        searchByArea(lat1, lng1, lat2,lng2 )old
                         // 29092016 [E] var for searching
 //                            console.debug("[dbg][mouse postition]")
+                        selectingArea=[]; //26102016 fix area search bug
                         selectingArea.push(lat1, lng1, lat2,lng2)
                         areaSelectMode=false
 
                         if(predictAreaSel === true){
                             predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update, _elSeason)
+
                             predictAreaSel = false
                         }else{
                             doSearch()
@@ -1137,9 +1149,9 @@ Component {
             MyChartView {
                 categorieslist :  catelist
                 categoriesvalues :   catevalues
-                maxcycloneNo : rangemax
-                mincycloneNo : rangemin
-//                clearflag : cvCleanFlag
+                rangeMax : rangemax
+                rangeMin : rangemin
+                cvtitle: "The number of cyclone in the year"
             }
 
     }

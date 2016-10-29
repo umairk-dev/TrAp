@@ -7,8 +7,9 @@ import QtQuick.Controls 2.0
 import QtQuick.Controls 1.4
 
 Rectangle {
-    property var serchingitem: ['year','wind','pressure','area','country']
+    property var serchingitem: ['year','wind','pressure','area','country','elstat']
     property var countrylist: ["Fiji","Solomon","Tonga"]
+    property var statuslist: ["LaNina","Neutral","ElNino"]
     id: rview
     color : if(window._platform === "1"){"#ffff99"}
             else{"transparent"}
@@ -61,6 +62,14 @@ Rectangle {
                             areaSearchCheck(cbArea.checked)
                         }
                         // 19092016 [E] area selection
+                        // 27102016 [S] El nino/La nina serach
+                        if(cbElNi.checked){
+                            type=serchingitem[5]
+                            //String(comboBoxElNi.currentText)
+                            content=comboBoxElNi.currentText+","+comboBoxElNi.currentText
+                            addSearchCondtion(type,content)
+                        }
+                        // 27102016 [E] El nino/La nina serach
                         /*18082016 [E] Search signal*/
                         if(!cbArea.checked)
                             doSearch()//12092016 [S] Search signal
@@ -275,5 +284,39 @@ Rectangle {
             }
         }
         // 18092016 [E] predefine country search
+        // 27102016 [S] El nino/La nina serach
+                RowLayout{
+                    CheckBox{
+                        id:cbElNi
+                        Layout.topMargin: 10
+                        Layout.leftMargin: 10
+
+                        style: CheckBoxStyle{
+                             label: Text {
+                                 id: txtElNiCB
+                                    color: if(window._platform === "1"){"black"}
+                                           else
+                                           {"white"}
+                                    text: "El nino status"
+                                }
+                            }
+                        onCheckedChanged:  {
+                        if(cbElNi.checked)
+                            cbYear.checked=true
+                        }
+                    }
+                    Item {
+                        id: icomboBoxElNi
+                        visible: cbElNi.checked
+
+                        Layout.leftMargin: 10
+                            ComboBox {
+                                    id: comboBoxElNi
+                                    model:statuslist
+
+                            }
+                    }
+                }
+        // 27102016 [E] El nino/La nina serach
     }
 }
