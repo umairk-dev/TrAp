@@ -6,12 +6,10 @@ import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
-import Model 1.0
 Rectangle {
 
     objectName: "predictView"
-    property var modelList
-    property var models
+    property var ellaList : ["DJF", "JFM","FMA", "MAM", "AMJ","MJJ","JJA", "JAS","ASO","SON","OND", "NDJ"]
     color : "transparent"
 
 
@@ -43,6 +41,24 @@ Rectangle {
                 spacing : 20
 
                 Label{
+                    text : "Selected Season: " + ellaList[_elSeason-1]
+                    font.bold: true
+                    font.pointSize: 15
+                    color: "white"
+                }
+
+            }
+        }
+
+
+        RowLayout{
+
+            ColumnLayout {
+                Layout.leftMargin: 10
+                Layout.topMargin: 5
+                spacing : 20
+
+                Label{
                     text : "Selected Region: "
                     font.bold: true
                     font.pointSize: 15
@@ -51,7 +67,7 @@ Rectangle {
 
                 Label{
                     id : txtSelectedArea
-                    text : "From: " + window.selectingArea[0] + " , " + selectingArea[1] + "\nTo: "+ window.selectingArea[2] + "," + selectingArea[3]
+                    text : "From: " + window.selectingArea[0].toFixed(3) + " , " + selectingArea[1].toFixed(3) + "\nTo: "+ window.selectingArea[2].toFixed(3) + "," + selectingArea[3].toFixed(3)
                     font.pointSize: 12
                     color: "white"
                 }
@@ -65,10 +81,45 @@ Rectangle {
                 Layout.topMargin: 5
                 spacing : 20
 
+                Label{
+                    text : "Verification: "
+                    font.bold: true
+                    font.pointSize: 15
+                    color: "white"
+                }
+
+            }
+        }
+        RowLayout{
+
+            ColumnLayout {
+                Layout.leftMargin: 10
+                Layout.topMargin: 5
+                spacing : 20
+
                 Button{
-                    text : "Export Cyclone Count"
+                    text : "Cyclone Count"
+                    onClicked: {
+
+                        getYearsCount();
 
 
+
+                    }
+                }
+            }
+
+
+            ColumnLayout {
+                Layout.topMargin: 5
+                spacing : 20
+                Button{
+                    id: btnSelect
+                    text:"Hindcast"
+
+                    onClicked: {
+                        Prediction.doBackcast();
+                    }
                 }
             }
         }
@@ -79,12 +130,29 @@ Rectangle {
                 Layout.leftMargin: 10
                 Layout.topMargin: 5
                 spacing : 20
-                Button{
-                    id: btnSelect
-                    text:"Hindcast"
 
+                Label{
+                    text : "Prediction: "
+                    font.bold: true
+                    font.pointSize: 15
+                    color: "white"
+                }
+
+            }
+        }
+
+
+        RowLayout{
+
+            ColumnLayout {
+                Layout.leftMargin: 10
+                Layout.topMargin: 5
+                spacing : 20
+
+                Button{
+                    text : "Forecast"
                     onClicked: {
-                        doBackcast();
+                        Prediction.doForecast();
                     }
                 }
             }
@@ -107,5 +175,5 @@ Rectangle {
 
     }
 
-
+    Component.onCompleted: {txtInfo.text = ""}
 }

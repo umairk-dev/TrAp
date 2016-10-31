@@ -113,5 +113,9 @@ MapPolyline {
         }
 
 
+
+        Component.onDestruction:  {
+            otherLines = [];
+        }
 }
 

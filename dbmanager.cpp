@@ -47,8 +47,11 @@ QList<ElLa*> DbManager::getElLa(int month){
     QList<ElLa*> list;
 
     if(db.open()){
+        QDateTime local(QDateTime::currentDateTime());
+        int current = local.toString("yyyy").toInt();
+
         QSqlQuery * query = new QSqlQuery(db);
-        query->prepare("Select * from ElninoLanina WHERE month = "+QString::number(month)+ " ORDER BY year ASC");
+        query->prepare("Select * from ElninoLanina WHERE month = "+QString::number(month)+ " AND year < " + QString::number(current) + " ORDER BY year ASC");
 
         if(query->exec() == true)
         {
@@ -67,6 +70,31 @@ QList<ElLa*> DbManager::getElLa(int month){
     return list;
 }
 
+
+ElLa* DbManager::getSingleElLa(int year, int month){
+    ElLa * ella = NULL;
+
+    if(db.open()){
+
+        QSqlQuery * query = new QSqlQuery(db);
+        query->prepare("Select * from ElninoLanina WHERE month = "+QString::number(month)+ " AND year = " + QString::number(year) );
+
+        if(query->exec() == true)
+        {
+            if (query->next()) {
+                ella = new ElLa;
+                ella->setYear(query->value("year").toInt());
+                ella->setMonth(query->value("month").toInt());
+                ella->setValue(query->value("value").toDouble());
+                ella->setColor(query->value("color").toString());
+                return ella;
+            }
+        }
+        delete query;
+    }
+    db.close();
+    return ella;
+}
 
 
 void DbManager::setMapView(QObject * mapView){
@@ -542,11 +570,11 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
 
 
     if(count == 0){
-        QString msg = "0 Cyclones originated in selected region from 1950 to " + QString::number(current);
+        QString msg = "0 Cyclones originated in selected region from 1970 to " + QString::number(current);
         if(!QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
             qDebug() << "Failed to invoke showStatus";
     }else{
-        QString msg = QString::number(count) + " Cyclones originated in selected region from 1950 to " + QString::number(current);
+        QString msg = QString::number(count) + " Cyclones originated in selected region from 1970 to " + QString::number(current);
         if(!QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
             qDebug() << "Failed to invoke showStatus";
 
@@ -574,7 +602,7 @@ void DbManager::getModelList(){
                 model->setModelID(query->value("modelID").toString());
                 model->setModelData(query->value("modelData").toString());
                 model->setModelName(query->value("modelName").toString());             
-                model->setModelEquation(query->value("equation").toString());
+                model->setModelEquation(query->value("modelEquation").toString());
 
                 QSqlQuery * query2 = new QSqlQuery(db);
                 query2->prepare("SELECT * FROM modelVariable WHERE modelID = " + query->value("modelID").toString() );

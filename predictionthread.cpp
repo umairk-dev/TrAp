@@ -18,14 +18,19 @@ void PredictionThread::run()
     QHash<QString, int> data = db.searchArea(prediction->getFromLat(),prediction->getFromLng(), prediction->getToLat(), prediction->getToLng());
     prediction->setYearCount(data);
 
-    /*  for(int i = 1950; i <= 2016; i++){
-            qDebug()<<i <<" - "<<prediction->getYearCount().value(QString::number(i))<<endl;
-        }
-    */
+     int count = 0;
+     int year = 1970;
+     for(int i = 0; i <= data.size(); i++){
+          if(prediction->getYearCount().value(QString::number(year)) > 0){
+            count++;
+          }
+          year++;
+     }
 
 
-    prediction->generateData();
-
-    prediction->doPrdiction(2016);
+     if(count> 5){
+        prediction->generateData();
+        prediction->doPrdiction(2016);
+     }
 
 }

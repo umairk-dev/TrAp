@@ -1,31 +1,29 @@
-#include "hindcastthread.h"
+#include "forecastthread.h"
 #include "plotpoint.h"
-#include "prediction.h"
-#include "mathexpr.h"
-#include "presult.h"
-HindcastThread::HindcastThread(Prediction *prediction)
+
+ForecastThread::ForecastThread(Prediction *prediction)
 {
-    this->prediction = prediction;
+        this->prediction = prediction;
 }
 
 
-void HindcastThread::run()
+void ForecastThread::run()
 {
     freeMemory();
-    doHindcast();
+    doForecast();
 }
 
 
-void HindcastThread::freeMemory(){
-    if(hindcastResult.size() > 0){
-        for(int i = 0; i < hindcastResult.size(); i ++){
-             delete qvariant_cast<PResult*>( hindcastResult.at(i));
+void ForecastThread::freeMemory(){
+    if(forecastResult.size() > 0){
+        for(int i = 0; i < forecastResult.size(); i ++){
+             delete qvariant_cast<PResult*>( forecastResult.at(i));
         }
     }
-    hindcastResult.clear();
+    forecastResult.clear();
 }
 
-QList<QString> * HindcastThread::getMonitorValues(QString name){
+QList<QString> * ForecastThread::getMonitorValues(QString name){
 
     QString fname = QCoreApplication::applicationDirPath() + "/"+name + "CODAchain1.txt";
     QFile file(fname);
@@ -49,7 +47,7 @@ QList<QString> * HindcastThread::getMonitorValues(QString name){
 }
 
 
-void HindcastThread::doHindcast(){
+void ForecastThread::doForecast(){
 
     QObject * mapView = prediction->getEngine()->rootObjects().at(0)->findChild<QObject*>("map");
     QString msg = "loading Monitors";
@@ -84,55 +82,44 @@ void HindcastThread::doHindcast(){
         vararray[i+1] = xvar;
     }
 
-    QList<ElLa*> ella = db.getElLa(prediction->_elSeason.toInt());
     QDateTime local(QDateTime::currentDateTime());
     int current = local.toString("yyyy").toInt();
+
+    ElLa* ella = db.getSingleElLa(current, prediction->_elSeason.toInt());
+
+    if(ella == NULL){
+        msg = "ElNino LaNina data is not available for selected season";
+        if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
+            qDebug() << "Failed to invoke showStatus";
+        return;
+    }
 
     msg = "Calculating lambda.. ";
     if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
         qDebug() << "Failed to invoke showStatus";
 
-    QHash<int, QList<double>*> * result = new QHash<int, QList<double>*>();
+    QList<double> * result = new QList<double>();
     size = monitors->value(list.at(0))->size();
     for(int i = 0; i < size; i++){
-        for(int j =0; j < ella.size() ; j++){
-
-            if(ella.at(j)->getYear() < current){
-                double lambda = 0;
-              //  mu::Parser p;
-                double el = ella.at(j)->getValue();
-                vararray[0]->pval = &el;
-              //  p.DefineVar( "Nino34[i]",&el) ;
-                for(int k = 0; k < list.size(); k++){
-                    double v = monitors->value(list.at(k))->at(i).toDouble();
-                    vararray[k+1]->pval = &v;
-
-                   /* if(list.at(k) == "beta1")
-                        lambda += monitors->value(list.at(k))->at(i).toDouble() * ella.at(j)->getValue() ;
-                    else if(list.at(k) == "beta0")
-                        lambda += monitors->value(list.at(k))->at(i).toDouble() ;
-                    */
-                }
-
-                ROperation op ( eq,(list.size()+1), vararray );
-
-                lambda = op.Val();//p.Eval();
-                lambda = exp(lambda);
-
-                if(lambda < 0)
-                    lambda = 0;
-
-
-                if(result->contains(ella.at(j)->getYear())){
-                    result->value(ella.at(j)->getYear())->append(lambda);
-                }else{
-                    QList<double> * lambdas = new QList<double>();
-                    lambdas->append(lambda);
-                    result->insert(ella.at(j)->getYear(), lambdas);
-                }
-            }
-
+        double lambda = 0;
+        double el = ella->getValue();
+        vararray[0]->pval = &el;
+        for(int k = 0; k < list.size(); k++){
+              double v = monitors->value(list.at(k))->at(i).toDouble();
+              vararray[k+1]->pval = &v;
         }
+
+        ROperation op ( eq,(list.size()+1), vararray );
+
+        lambda = op.Val();
+        lambda = exp(lambda);
+
+        if(lambda < 0)
+            lambda = 0;
+
+
+        result->append(lambda);
+
     }
 
     for(int i = 0; i < list.size(); i++ ){
@@ -144,46 +131,27 @@ void HindcastThread::doHindcast(){
     //save result & free memory
 
 
-    for(int i = 0; i < ella.size(); i++){
-        if(ella.at(i)->getYear() != current){
+    PResult * r = processLambda(ella->getYear(), result);
+    QVariant p;
+    p.setValue(r);
+    forecastResult.append(p);
 
 
-            PResult * r = processLambda(ella.at(i)->getYear(), result->value(ella.at(i)->getYear()));
-            QVariant p;
-            p.setValue(r);
-            hindcastResult.append(p);
-
-            //saveResult(ella.at(i)->getYear(), result->value(ella.at(i)->getYear()));
-            result->value(ella.at(i)->getYear())->clear();
-            result->remove(ella.at(i)->getYear());
-
-
-        }
-    }
-
-    if(!QMetaObject::invokeMethod(mapView, "plotHindCastResult", Q_ARG(QVariant, QVariant::fromValue(hindcastResult))))
+    if(!QMetaObject::invokeMethod(mapView, "plotForeCastResult", Q_ARG(QVariant, QVariant::fromValue(forecastResult))))
         qDebug() << "Failed to invoke push";
 
 
-
-
-    for(int i = 0; i < ella.size(); i++){
-        ella.removeAt(i);
-    }
-
+    delete ella;
     delete result;
-
     delete m;
-   // delete mapView;
-
 }
 
-int HindcastThread::roundLambda( double value )
+int ForecastThread::roundLambda( double value )
 {
   return INT32_C(floor( value + 0.5 ));
 }
 
-PResult *  HindcastThread::processLambda(int year, QList<double>* data){
+PResult *  ForecastThread::processLambda(int year, QList<double>* data){
 
      QHash<int, int> * plotData = new QHash<int, int>();
 
@@ -233,7 +201,7 @@ PResult *  HindcastThread::processLambda(int year, QList<double>* data){
 }
 
 
-void HindcastThread::saveResult(int year, QList<double>* data){
+void ForecastThread::saveResult(int year, QList<double>* data){
     QString dataFile = QCoreApplication::applicationDirPath()+"/result/" + QString::number(year)+".txt";
     QFile file(dataFile);
     file.remove();

@@ -55,7 +55,8 @@ ApplicationWindow {
                 spacing : 20
             ChartView {
                 id: cvShow
-                title: "cvtitle"
+                title: {if(predictionData.length > 1){ "Hindcast of cyclones - Year " + yearrange[cbhgwin.currentIndex]}
+                    else {"Forecast of cyclones in selected region - Year " + Qt.formatDateTime(new Date(), "yyyy")} }
                 width: 640
                 height: 480
                 anchors.top :parent.top
@@ -92,13 +93,22 @@ ApplicationWindow {
     }
     function loadData()
     {
-       yearrange=[]
-       var currentyear = parseInt(Qt.formatDateTime(new Date(), "yyyy") ) - 1
-       for(var i=1970;i<=currentyear;i++)
-            yearrange.push(i)
-       cbhgwin.model=yearrange
+
+       if(predictionData.length > 1){
+           yearrange=[]
+           var currentyear = parseInt(Qt.formatDateTime(new Date(), "yyyy") ) - 1
+           for(var i=1970;i<=currentyear;i++)
+                yearrange.push(i)
+           cbhgwin.model=yearrange
+       }else{
+            cbhgwin.visible = false;
+            btnhgwin.visible = false;
+       }
 //       selectdata()
     }
     Component.onCompleted: loadData();
+
+    Component.onDestruction: { predictionData = [] }
+
 }
 

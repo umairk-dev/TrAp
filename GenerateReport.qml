@@ -79,42 +79,42 @@ Rectangle {
             Layout.topMargin: 10
             Layout.leftMargin: 10
         }
-    RowLayout{
-       Button {
-            id: buttonSearch
-            text: qsTr("Generate Report")
-            onClicked: {
-                var type,content;
-                if(rbAll.checked === true)
-                {
-                    type = "all"
-                }else if(rbSelected.checked === true)
-                {
-                    type = "selected"
-                }else if(rbFiltered.checked === true)
-                {
-                    type = "filtered"
-                }else
-                    type = "all"
+       RowLayout{
+          Button {
+               id: buttonSearch
+               text: qsTr("Generate Report")
+               onClicked: {
+                   var type,content;
+                   if(rbAll.checked === true)
+                   {
+                       type = "all"
+                   }else if(rbSelected.checked === true)
+                   {
+                       type = "selected"
+                   }else if(rbFiltered.checked === true)
+                   {
+                       type = "filtered"
+                   }else
+                       type = "all"
 
-                fileDialog.type = type;
-                fileDialog.open();
-            }
-            Layout.topMargin: 10
-            Layout.leftMargin: 10
-        }
+                   fileDialog.type = type;
+                   fileDialog.open();
+               }
+               Layout.topMargin: 10
+               Layout.leftMargin: 10
+           }
 
-       Button {
-            id: btnCancel
-            text: qsTr("Cancel")
-            onClicked: {
-                window.isReportScreen = false;
-                stack.pop()
-            }
-            Layout.topMargin: 10
-            Layout.leftMargin: 10
-        }
-    }
-    }
+          Button {
+               id: btnCancel
+               text: qsTr("Cancel")
+               onClicked: {
+                   window.isReportScreen = false;
+                   stack.pop()
+               }
+               Layout.topMargin: 10
+               Layout.leftMargin: 10
+           }
+       }
+       }
     Component.onCompleted: fileDialog.close();
 }

@@ -65,6 +65,7 @@ void Controls::searchCycloneByName(const QString &name)
 
      //  QUrl url("http://smarttechsoft.com/trap/index.php?type=cname&name=" + name );
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyname&key="+ name +"&_format=json&source=2");
+       qDebug() << url;
        nam->get(QNetworkRequest(url));
 
 }
@@ -98,6 +99,7 @@ void Controls::searchCycloneByYear(const QString &year)
 //       QUrl url("http://smarttechsoft.com/trap/index.php?type=cyear&year=" + year );
 
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyyear&key="+ year +"&_format=json&source=2");
+      qDebug() << url;
        nam->get(QNetworkRequest(url));
 }
 
@@ -109,7 +111,7 @@ void Controls::searchCycloneByWind(const QString &windFrom, const QString &windT
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbywind&windfrom="+ windFrom +"&windto="+windTo+"&_format=json&source=2");
-//       qDebug() << url;
+       qDebug() << url;
        nam->get(QNetworkRequest(url));
 }
 
@@ -120,6 +122,7 @@ void Controls::searchCycloneByYears(const QString &yearFrom,const QString &yearT
        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(searchCycloneServiceFinished(QNetworkReply*)));
        QUrl url("http://130.56.253.211/api2/web/index.php?r=cyclone/searchbyyears&yearfrom="+yearFrom+"&yearto="+ yearTo +"&_format=json&source=2");
+       qDebug() << url;
        nam->get(QNetworkRequest(url));
 }
 
@@ -202,6 +205,8 @@ void Controls::searchCycloneByMultiPara(const QVariant &multiplePara)
 
 void Controls::clearMap()
 {
+
+    freeMemory();
     QObject *map = _engine->rootObjects().at(0)->findChild<QObject*>("map");
     if(map)
     {
@@ -228,7 +233,7 @@ void Controls::controlMapMouse(const bool& status)
 
 void Controls::generateReport(const QString &path,const  QVariant &cyclones)
 {
-
+    qDebug() << path;
     QString fileName = path.mid(8,path.length());
     if(fileName.mid(fileName.length()-4) != ".csv")
         fileName.append(".csv");
@@ -272,10 +277,27 @@ void Controls::generateReport(const QString &path,const  QVariant &cyclones)
 
 }
 
+void Controls::freeMemory(){
+
+    if(cyclones.size() > 0){
+        for(int i = 0; i < cyclones.size(); i++){
+
+            Cyclone * c = qvariant_cast<Cyclone*>(cyclones.at(i));
+
+            for(int j = 0; j < c->getTracks().size(); j++){
+                delete qvariant_cast<CycloneTrack *>(c->getTracks().at(j));
+            }
+            delete c;
+        }
+        cyclones.clear();
+    }
+}
+
 void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 {
     if(reply->error() == QNetworkReply::NoError) {
 
+        freeMemory();
         QStringList propertyNames;
         QStringList propertyKeys;
 
@@ -287,8 +309,6 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
         QJsonObject jsonObject = jsonResponse.object();
 
-
-        QVariantList cyclones;
 
         if(jsonObject.keys().contains("cyclones")){
             qDebug() << strReply;

@@ -1,7 +1,9 @@
 #ifndef HINDCASTTHREAD_H
 #define HINDCASTTHREAD_H
 #include <QThread>
+#include "plotpoint.h"
 #include "prediction.h"
+#include "mathexpr.h"
 #include "presult.h"
 class HindcastThread : public QThread
 {
@@ -18,6 +20,9 @@ class HindcastThread : public QThread
         PResult *  processLambda(int year, QList<double>* data);
         int roundLambda(double);
         void doHindcast();
+        void freeMemory();
+        QVariantList hindcastResult;
+
 };
 
 #endif // HINDCASTTHREAD_H

@@ -22,6 +22,8 @@ signals:
 
 private:
      QQmlApplicationEngine* _engine;
+     QVariantList cyclones;
+     void freeMemory();
 
 public
 

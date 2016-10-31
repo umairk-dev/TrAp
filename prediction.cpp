@@ -12,7 +12,8 @@
 #include <signal.h>
 #include <math.h>
 #include "hindcastthread.h"
-
+#include <filedialogbox.h>
+#include "forecastthread.h"
 Prediction::Prediction(QObject *parent) : QObject(parent)
 {
    /* QLibrary lib(QCoreApplication::applicationDirPath() + "/libOpenBUGS.dll");
@@ -22,6 +23,9 @@ Prediction::Prediction(QObject *parent) : QObject(parent)
            qDebug() << "library loaded";
            initDir();
    }*/
+
+  dlg = new  FileDialogBox();
+
 }
 
 
@@ -83,13 +87,13 @@ void Prediction::doPrdiction(int year)
                 qDebug() << str;
                 if(str == "\nCODA files written"){
                     count++;    
+                    msg = "";
+                    if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
+                        qDebug() << "Failed to invoke showStatus";
+
 
                     if(count>1 && !isOpen){
-                        msg = "";
-                        if(mapView && !QMetaObject::invokeMethod(mapView, "showStatus", Q_ARG(QVariant, QVariant::fromValue(msg))))
-                            qDebug() << "Failed to invoke showStatus";
-
-                        if(mapView && !QMetaObject::invokeMethod(mapView, "onModelGenerated"))
+                         if(mapView && !QMetaObject::invokeMethod(mapView, "onModelGenerated"))
                             qDebug() << "Failed to invoke onModelGenerated";
                         else
                             qDebug() << "not found";
@@ -139,8 +143,6 @@ void Prediction::generateData(){
     file.remove();
     DbManager db = DbManager::get();
     QList<ElLa*> list = db.getElLa(_elSeason.toInt());
-    QDateTime local(QDateTime::currentDateTime());
-    int current = local.toString("yyyy").toInt();
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream stream(&file);
         int year = 1970;
@@ -186,7 +188,11 @@ void Prediction::generateData(){
         //"list(N = "<<list.size()<<", lower = 0.80, upper = 0.95)"
     }
 
+
     file3.close();
+
+    for(int i = 0; i < list.size(); i++)
+        delete list.at(i);
 }
 
 void Prediction::loadData(){
@@ -375,6 +381,9 @@ void Prediction::setToLng(double lng){
 
 void Prediction::setEngine(QQmlApplicationEngine * engine){
     this->engine = engine;
+    dlg = new FileDialogBox();
+
+
 }
 
 QQmlApplicationEngine * Prediction::getEngine(){
@@ -503,5 +512,43 @@ void Prediction::doBackcast(){
 
 }
 
+
+
+void Prediction::doForecast(){
+
+    ForecastThread * forecast = new ForecastThread(this);
+    forecast->start();
+
+}
+
+
+
+void Prediction::getYearsCount(){
+    QObject * mapView = engine->rootObjects().at(0)->findChild<QObject*>("map");
+    QDateTime local(QDateTime::currentDateTime());
+    int current = local.toString("yyyy").toInt();
+    QStringList count;
+    for(int i = 1970; i < current; i++)
+        count.append(QString::number(yearsCount[QString::number(i)]));
+
+
+
+    if(!QMetaObject::invokeMethod(mapView, "showYearsCount", Q_ARG(QVariant, QVariant::fromValue(count))))
+        qDebug() << "Failed to invoke push";
+
+
+}
+
+
+void Prediction::saveYearsCount(const QString& path)
+{
+    QString fileName = dlg->saveFile();
+    if( !fileName.isNull() ){
+        if(fileName.mid(fileName.length()-4) != ".txt")
+            fileName.append(".txt");
+        qDebug() << fileName;
+        QFile::copy(dataFile, fileName);
+    }
+}
 
 

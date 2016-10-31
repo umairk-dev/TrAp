@@ -245,6 +245,7 @@ Rectangle {
                         window._update = txtUpdate.text;
                         window._burnin = txtBurnin.text;
                         window._elSeason = cbElNinoLaNina.currentIndex + 1;
+                        console.log(window._elSeason)
                         txtInfo.text = "Select Area to start generatig model.."
                         areaSearchCheck(areaSelectMode);
                         window.isPredictScreen = false;

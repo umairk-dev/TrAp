@@ -20,7 +20,9 @@ SOURCES += main.cpp \
     plotpoint.cpp \
     mathexpr.cpp \
     hindcastthread.cpp \
-    presult.cpp
+    presult.cpp \
+    filedialogbox.cpp \
+    forecastthread.cpp
 
 RESOURCES += qml.qrc
 
@@ -71,7 +73,9 @@ HEADERS += \
     plotpoint.h \
     mathexpr.h \
     hindcastthread.h \
-    presult.h
+    presult.h \
+    filedialogbox.h \
+    forecastthread.h
 
 
 INCLUDEPATH += $$PWD/.

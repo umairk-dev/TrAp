@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     Controls control;
     DbManager db = DbManager::get();
     Utils utils;
-    Prediction prediction;
+    Prediction * prediction = new Prediction();
    // qmlRegisterType(Cyclone);
     QLoggingCategory::setFilterRules("qt.network.ssl.w arning=false");//Test 21082016
     QScreen * screen = app.primaryScreen();
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 
     context->setContextProperty("Controls", &control);
     context->setContextProperty("Utils", &utils);
+    context->setContextProperty("Prediction", prediction);
     context->setContextProperty(QStringLiteral("screenWidth"),
                             width);
     context->setContextProperty(QStringLiteral("screenHeight"),
@@ -138,12 +139,18 @@ int main(int argc, char *argv[])
 
     //search signal  - Predict Cyclones
     QObject::connect(window, SIGNAL(predictCyclones(QString,QString,QString,QString,QString,QString,QString,QString)),
-    &prediction, SLOT(predictCyclones(QString,QString,QString,QString,QString,QString,QString,QString)));
+    prediction, SLOT(predictCyclones(QString,QString,QString,QString,QString,QString,QString,QString)));
 
 
-    //search signal  - Backcast
+    //signal  - Backcast
     QObject::connect(window, SIGNAL(doBackcast()),
-    &prediction, SLOT(doBackcast()));
+    prediction, SLOT(doBackcast()));
+
+
+    //signal  - GetYearsCount
+    QObject::connect(window, SIGNAL(getYearsCount()),
+    prediction, SLOT(getYearsCount()));
+
 
 
     //search signal  - by Area
@@ -168,6 +175,12 @@ int main(int argc, char *argv[])
     &control, SLOT(generateReport(QString,QVariant)));
 
 
+    //prediction signal  - Export years count
+    QObject::connect(window, SIGNAL(saveYearsCount(QString)),
+    prediction, SLOT(saveYearsCount(QString)));
+
+
+
     //connect c++ to qml for sending data
     QObject::connect(&control, SIGNAL(setTextField(QVariant)),
     window, SLOT(setTextField(QVariant)));
@@ -176,7 +189,7 @@ int main(int argc, char *argv[])
     control.setEngine(&engine);
     dbupdate.setEngine(&engine);
     db.setEngine(&engine);
-    prediction.setEngine(&engine);
+    prediction->setEngine(&engine);
 
     return app.exec();
 }

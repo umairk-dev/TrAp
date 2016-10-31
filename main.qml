@@ -27,7 +27,7 @@ ApplicationWindow  {
     property bool isReportScreen: false
     property bool isFilterScreen: false
     property bool isPredictScreen: false
-
+    property bool isTestModelScreen : false
     // 26092016 [S] ChartView show after search
     //property bool isChartConfigScreen: false
     property bool isChartScreen: false
@@ -87,6 +87,8 @@ ApplicationWindow  {
       1
      else
       0
+
+
      }
 
     /****************************************/
@@ -129,15 +131,17 @@ ApplicationWindow  {
         color : "white"
     }
 
-         Text {
-             x : 20
-             y : 60
+      Text {
              z : 70
+             x : parent.width * .4
+             y : parent.height * .05
              font.pointSize : 12
+             font.bold: true
              id: txtInfo
 
              color : "white"
-         }
+
+      }
 
     function getTrackColor(windSpeed){
         if(windSpeed===-999)
@@ -192,10 +196,12 @@ ApplicationWindow  {
     signal searchByMultiPara(variant multisearchpara)
     // 29092016 [E] search by multiple parameter
     signal generateReport(string path, variant cyclones)
+    signal saveYearsCount(string path);
     signal controlMapMouse(bool status);
     signal clearMap();
     signal getModelList();
     signal doBackcast();
+    signal getYearsCount();
 
     //  signal sendWebView(WebEngineView view)
 
@@ -277,33 +283,33 @@ ApplicationWindow  {
                if(searchPara.length === 1 && searchPara[searchPara.length-1].length ===4)
                {
                     processing.z = 60
-                    searchByYear(searchPara[searchPara.length-1])
+                    Controls.searchCycloneByYear(searchPara[searchPara.length-1])
                }
                else
                {
                    singleSearchPara = String(searchPara[searchType.length-1]).split(',')
 //                   console.log("[DBG]p1"+paraYear[0]+"\tp2"+paraYear[1])
                    processing.z = 60
-                   searchByYears(singleSearchPara[0],singleSearchPara[1])
+                   Controls.searchCycloneByYears(singleSearchPara[0],singleSearchPara[1])
                }//searchByYearRange(searchPara[searchPara.length-1]);
            }
            else if(searchType[searchType.length-1] === serchingitem[1] ){
                singleSearchPara = String(searchPara[searchType.length-1]).split(',')
 //               console.log("[DBG_wind]p1"+singleSearchPara[0]+"\tp2"+singleSearchPara[1])
                processing.z = 60
-               searchByWind(singleSearchPara[0],singleSearchPara[1])
+               Controls.searchCycloneByWind(singleSearchPara[0],singleSearchPara[1])
            }
            else if(searchType[searchType.length-1] === serchingitem[2] ){
                singleSearchPara = String(searchPara[searchType.length-1]).split(',')
 //               console.log("[DBG]p1"+singleSearchPara[0]+"\tp2"+singleSearchPara[1])
                processing.z = 60
-               searchByPressure(singleSearchPara[0],singleSearchPara[1])
+               Controls.searchCycloneByPressure(singleSearchPara[0],singleSearchPara[1])
            }
            else if(searchType[searchType.length-1] === serchingitem[3] ){
            // 29092016 [S] area search
 //               console.log("[DBG]type3:[L]"+selectingArea.length+"\tp2"+selectingArea[0])
                processing.z = 60
-               searchByArea(parseFloat(selectingArea[0]),parseFloat(selectingArea[1]),parseFloat(selectingArea[2]),parseFloat(selectingArea[3]))
+               Controls.searchCycloneByArea(parseFloat(selectingArea[0]),parseFloat(selectingArea[1]),parseFloat(selectingArea[2]),parseFloat(selectingArea[3]))
            // 29092016 [E] area search
            }
            else if(searchType[searchType.length-1] === serchingitem[4] ){
@@ -312,7 +318,7 @@ ApplicationWindow  {
                singleSearchPara = String(preDefineCountry[parseInt(searchPara[searchType.length-1])]).split(',')
 //               console.log("[DBGc]p1:"+singleSearchPara[0]+"\tp2:"+singleSearchPara[1]+"\t")
                processing.z = 60
-               searchByArea(parseFloat(singleSearchPara[0]),parseFloat(singleSearchPara[1]),parseFloat(singleSearchPara[2]),parseFloat(singleSearchPara[3]))
+               Controls.searchCycloneByArea(parseFloat(singleSearchPara[0]),parseFloat(singleSearchPara[1]),parseFloat(singleSearchPara[2]),parseFloat(singleSearchPara[3]))
            // 18092016 [E] predefine country search
            }
       }
@@ -340,7 +346,7 @@ ApplicationWindow  {
             //ToDO: remove it, debug only
             for(var j=0;j<multiSearchPara.length;j++)
                 console.debug("[dubug multi para] j:"+j+"[para]"+multiSearchPara[j])
-            searchByMultiPara(multiSearchPara)
+            Controls.searchCycloneByMultiPara(multiSearchPara)
         }//29092016 [E] area search - multi type search
     }
     // 14092016 [E] new search mechanism
@@ -377,6 +383,36 @@ ApplicationWindow  {
                     iconSource: "./images/" + dir[ppiRange] +"/filter.png"
                     visible: false
                     onClicked:  if(isFilterScreen === false){
+
+                                    if(window.isReportScreen !== false){
+                                        window.isReportScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    // close the bar chart
+                                    if(window.isChartScreen !== false){
+                                        window.isChartScreen = false;
+                                        stack.pop();
+                                    }
+
+
+                                    if(window.isPredictScreen !== false){
+                                        window.isPredictScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isSearchScreen !== false){
+                                        window.isSearchScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isTestModelScreen !== false){
+                                        window.isTestModelScreen = false;
+                                        stack.pop();
+                                    }
+
+
+
                                     if(cycloneInfo.length > 0){
                                         stack.push(resultFilterView)
                                         isFilterScreen = true
@@ -420,9 +456,36 @@ ApplicationWindow  {
                                         window.isSearchScreen = false;
                                         stack.pop();
                                     }
+
+                                    if(window.isPredictScreen !== false){
+                                        window.isPredictScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isSearchScreen !== false){
+                                        window.isSearchScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isTestModelScreen !== false){
+                                        window.isTestModelScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    // close the bar chart
+                                    if(window.isChartScreen !== false){
+                                        window.isChartScreen = false;
+                                        stack.pop();
+                                    }
+
+
                                     window.isReportScreen = true;
                                     stack.push(reportView);
                                     txtInfo.text = "";
+                                }else{
+                                    window.isReportScreen = false;
+                                    stack.pop();
+
                                 }
                 }
 
@@ -435,11 +498,29 @@ ApplicationWindow  {
                                         window.isReportScreen = false;
                                         stack.pop();
                                     }
+
                                     // close the bar chart
                                     if(window.isChartScreen !== false){
                                         window.isChartScreen = false;
                                         stack.pop();
                                     }
+
+
+                                    if(window.isPredictScreen !== false){
+                                        window.isPredictScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isSearchScreen !== false){
+                                        window.isSearchScreen = false;
+                                        stack.pop();
+                                    }
+
+                                    if(window.isTestModelScreen !== false){
+                                        window.isTestModelScreen = false;
+                                        stack.pop();
+                                    }
+
                                     //
                                     window.isSearchScreen = true;
                                     stack.push(searchingView);
@@ -450,6 +531,10 @@ ApplicationWindow  {
 //                                        isFilterScreen = false
 //                                        btnFilter.iconSource = "./images/" + dir[ppiRange] +"/filter.png"
 //                                    }
+                                }else{
+                                   window.isSearchScreen = false;
+                                   stack.pop();
+
                                 }
 
                 }
@@ -598,11 +683,23 @@ Component {
 
             property variant cyclones : []
 
+
             /*********************************************
             *   plot data
             **********************************************/
-            function plotHindCastResult(data){
-//               console.log(data);                
+            function showYearsCount(data){
+                console.log(data);
+                var component = Qt.createComponent("CycloneCountView.qml")
+                var w    = component.createObject(window, {"count" : data });
+                w.show();
+            }
+
+            /*********************************************
+            *   plot Hindcast data
+            **********************************************/
+
+
+            function plotForeCastResult(data){
                 predictdataset = new Array(data.length)
                 for(var i = 0; i < data.length; i++){
                     var points = data[i].result;
@@ -613,6 +710,33 @@ Component {
                     }
                     predictdataset[i]=temp
                 }
+
+                var component = Qt.createComponent("MyhistogramWindow.qml")
+                var myhisgwin    = component.createObject(window,{"predictionData":predictdataset});
+                myhisgwin.show();
+            }
+
+
+            /*********************************************
+            *   plot Hindcast data
+            **********************************************/
+            function plotHindCastResult(data){
+//               console.log(data);
+
+                predictdataset = new Array(data.length)
+                for(var i = 0; i < data.length; i++){
+                    var points = data[i].result;
+                    var temp = new Array(points.length);
+                    for(var j = 0; j < points.length; j++){
+                        console.log(points[j].x + " , " + points[j].y);
+                        temp[j] = points[j].y;
+                        //points[j].setObjectOwnership();
+                    }
+                    predictdataset[i]=temp
+                    //points.setObjectOwnership();
+                }
+
+                //data.setObjectOwnership();
                 var component = Qt.createComponent("MyhistogramWindow.qml")
                 var myhisgwin    = component.createObject(window,{"predictionData":predictdataset});
                 myhisgwin.show();
@@ -630,9 +754,43 @@ Component {
                 messageDialog.text = "model generated successfully..";
                 messageDialog.open();
 
+                window.isTestModelScreen = true;
                 stack.push(testPredictModel);
 
 
+            }
+
+
+            /*************************************
+            *   free memory
+            **************************************/
+
+            function freeMemory(){
+
+
+                for(var i = 0; i < map.cyclones.length; i++){
+                    var c = map.cyclones[i];
+                    for(var j = 0; j < c.length; j=j+4){
+                        console.log(c);
+                        if(c[j] !== undefined && c[j] !== null)
+                            c[j].destroy();
+                        var p = c[j+1];
+                        for(var k = 0; k < p.length;k++){
+                            if(p[k].destroy() !== undefined)
+                                p[k].destroy();
+                        }
+
+                        var q = c[j+2];
+                        for(var l = 0; l < q.length;l++){
+                            if(q[l].destroy() !== undefined)
+                                 q[l].destroy();
+                        }
+
+                    }
+                    map.cyclones[i] = [];
+
+                }
+                map.cyclones = [];
             }
 
 
@@ -651,14 +809,15 @@ Component {
             **************************************/
 
             function clearMap(){
+                freeMemory();
                 map.clearMapItems();
-                map.cyclones = [];
                 btnExportCSV.visible = false;
                 // 26092016 [S] ChartView show after search
                 btnChart.visible = false;
                 // 26092016 [E] ChartView show after search
                 txtInfo.text = "";
                 txtResultCount.text = ""
+
             }
 
 
@@ -729,7 +888,7 @@ Component {
                 processing.z = 0
                 for(var i = 0; i< cycloneInfo.length;i++)
                     cycloneInfo.pop();
-
+                freeMemory();
                 map.clearMapItems();
                 map.cyclones = [];
             }
@@ -826,8 +985,8 @@ Component {
                         window.mapView = map;
                         for(var i = 0; i< cycloneInfo.length;i++)
                             cycloneInfo.pop();
-                        cycloneInfo = []
-                        map.cyclones = [];
+                        cycloneInfo = [];
+                        freeMemory();
                         map.clearMapItems();
                         if(isFilterScreen === true){
                             stack.pop(resultFilterView)
@@ -884,6 +1043,7 @@ Component {
                                 if(j>0)
                                 {
                                     var Polyline = Qt.createQmlObject('MapPolylineCustom {}',map)
+
                                     Polyline.addCoordinate(QtPositioning.coordinate(data.tracks[j-1].latitude,data.tracks[j-1].longitude))
                                     Polyline.addCoordinate(QtPositioning.coordinate(data.tracks[j].latitude,data.tracks[j].longitude))
 //                                    console.log(data[i].tracks[j-1].latitude+","+data[i].tracks[j-1].longitude +" - "+ data[i].tracks[j].latitude+","+data[i].tracks[j].longitude)
@@ -934,7 +1094,8 @@ Component {
                     for(var i = 0; i< cycloneInfo.length;i++)
                         cycloneInfo.pop();
                     cycloneInfo = []
-                    map.cyclones = [];
+
+                    freeMemory();
                     map.clearMapItems();
 
                     btnClearMap.visible = false;
@@ -1012,11 +1173,11 @@ Component {
                         // 29092016 [E] var for searching
 //                            console.debug("[dbg][mouse postition]")
                         selectingArea=[]; //26102016 fix area search bug
-                        selectingArea.push(lat1, lng1, lat2,lng2)
+                        selectingArea.push(parseFloat(lat1), parseFloat(lng1), parseFloat(lat2),parseFloat(lng2))
                         areaSelectMode=false
 
                         if(predictAreaSel === true){
-                            predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update, _elSeason)
+                            Prediction.predictCyclones(lat1, lng1, lat2,lng2, modelID, _burnin, _update, _elSeason)
 
                             predictAreaSel = false
                         }else{

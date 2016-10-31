@@ -34,7 +34,7 @@ public:
     void addTracks(QVariantList tracks);
     bool  addElLa(ElLa* ella);
     QList<ElLa*> getElLa(int month);
-
+    ElLa* getSingleElLa(int year, int month);
     QObject * mapView;
     QQmlApplicationEngine* _engine;
     QHash<QString, int> searchArea(double latFrom, double lngFrom,double latTo, double lngTo);

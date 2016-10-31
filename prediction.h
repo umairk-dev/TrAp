@@ -7,7 +7,7 @@
 #include <QHash>
 #include "dbmanager.h"
 #include <QQmlApplicationEngine>
-
+#include "filedialogbox.h"
 class Prediction : public QObject
 {
     Q_OBJECT
@@ -22,6 +22,7 @@ public:
     QString _burnIn;
     QString _update;
     QString _elSeason;
+     FileDialogBox * dlg;
 signals:
 
 public slots:
@@ -43,7 +44,9 @@ public slots:
     void generateData();
     void doPrdiction(int year);
     void doBackcast();
-
+    void doForecast();
+    void getYearsCount();
+    void saveYearsCount(const QString& path);
 private:
     void predict(const QString& name);
     void initDir();
@@ -68,6 +71,8 @@ private:
     double toLng;
     QHash<QString, int> yearsCount;
     QQmlApplicationEngine *engine;
+
+
 };
 
 #endif // PREDICTION_H

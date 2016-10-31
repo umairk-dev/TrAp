@@ -42,6 +42,9 @@ private:
         QString num;
         QString ctype;
         QVariantList tracks;
+
+
+
 public slots:
      
 };

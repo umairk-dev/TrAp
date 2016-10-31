@@ -53,5 +53,6 @@
         <file>ModelEditView.qml</file>
         <file>TestPredictionModel.qml</file>
         <file>MyhistogramWindow.qml</file>
+        <file>CycloneCountView.qml</file>
     </qresource>
 </RCC>
