@@ -14,6 +14,12 @@
 #include "hindcastthread.h"
 #include <filedialogbox.h>
 #include "forecastthread.h"
+
+#if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
+#define Q_OS_MOBILE
+#else
+#define Q_OS_DESKTOP
+#endif
 Prediction::Prediction(QObject *parent) : QObject(parent)
 {
    /* QLibrary lib(QCoreApplication::applicationDirPath() + "/libOpenBUGS.dll");
@@ -31,6 +37,7 @@ Prediction::Prediction(QObject *parent) : QObject(parent)
 
 void Prediction::doPrdiction(int year)
 {
+  #ifdef  Q_OS_DESKTOP
   //  QString modelFile = "modelFile.txt";
   //  QString dataFile = "data.txt";
     QString numChains = "2";
@@ -134,7 +141,7 @@ void Prediction::doPrdiction(int year)
   //Load the data
   //   _CmdInterpreter("BugsEmbed.SetFilePath('" + dataFile.toStdString() + "');BugsEmbed.LoadDataGuard;BugsEmbed.LoadData");
 
-
+#endif
 }
 
 void Prediction::generateData(){

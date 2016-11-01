@@ -28,6 +28,7 @@ ApplicationWindow  {
     property bool isFilterScreen: false
     property bool isPredictScreen: false
     property bool isTestModelScreen : false
+	property bool isBoundarychecked: true //31102016 add vince
     // 26092016 [S] ChartView show after search
     //property bool isChartConfigScreen: false
     property bool isChartScreen: false
@@ -239,7 +240,6 @@ ApplicationWindow  {
     // slots
     function setTextField(text){
          console.log("setTextField: " + text)
-
         //stack.zoomIn();
     }
 
@@ -328,13 +328,15 @@ ApplicationWindow  {
 
             for(var i=0;i<searchType.length;i++)
             {
+//                console.log("\n[DBG_addpara]p1:"+searchType[i]+"\tp2:"+searchPara[i]+"\n")
                 if(searchType[i] === serchingitem[3])
                 {
                     multiSearchPara.push(serchingitem[3],selectingArea)
                 }
                 else if(searchType[i] === serchingitem[4])
                 {
-                    var longlatitude=String(preDefineCountry[parseInt(searchPara[searchType.length-1])]).split(',')
+                    var longlatitude=String(preDefineCountry[parseInt(searchPara[i])]).split(',')
+//                    console.log("[DBGc]p1:"+longlatitude[0]+"\tp2:"+longlatitude[1]+"\tp3:"+longlatitude[2]+"\tp4:"+longlatitude[3]+"\tpara:"+searchPara[searchType.length-1]+"\n")
                     multiSearchPara.push(serchingitem[3],longlatitude)
                 }
                 else
@@ -377,7 +379,11 @@ ApplicationWindow  {
     toolBar : ToolBar {
             RowLayout {
                 anchors.fill: parent
-
+                CheckBox{
+                    id: cbBoundary
+                    text: "Boundary"
+                    checked: isBoundarychecked
+                }
                 ToolButton {
                     id : btnFilter
                     iconSource: "./images/" + dir[ppiRange] +"/filter.png"
@@ -584,7 +590,9 @@ ApplicationWindow  {
                 ToolButton {
                     text: "About"
                    //iconSource: "save-as.png"
-                    onClicked:  stack.push(submitTextField("hello"))//console.log(dir[ppiRange])
+                    onClicked:  {   messageDialog.title = "About"
+                                    messageDialog.text = "Source:..."
+                                    messageDialog.open()}//stack.push(submitTextField("hello"))//console.log(dir[ppiRange])
 
                 }
 
@@ -811,6 +819,7 @@ Component {
             function clearMap(){
                 freeMemory();
                 map.clearMapItems();
+				map.initMap(); //31102016 vince boundary
                 btnExportCSV.visible = false;
                 // 26092016 [S] ChartView show after search
                 btnChart.visible = false;
@@ -868,6 +877,7 @@ Component {
                     cycloneInfo.pop();
                 map.cyclones = [];
                 map.clearMapItems();
+                map.initMap(); //31102016 vince boundary
             }
 
 
@@ -890,6 +900,7 @@ Component {
                     cycloneInfo.pop();
                 freeMemory();
                 map.clearMapItems();
+                map.initMap(); //31102016 vince boundary
                 map.cyclones = [];
             }
 
@@ -988,6 +999,7 @@ Component {
                         cycloneInfo = [];
                         freeMemory();
                         map.clearMapItems();
+                        map.initMap(); //31102016 vince boundary
                         if(isFilterScreen === true){
                             stack.pop(resultFilterView)
                             isFilterScreen = false
@@ -1097,6 +1109,7 @@ Component {
 
                     freeMemory();
                     map.clearMapItems();
+                    map.initMap(); //31102016 vince boundary
 
                     btnClearMap.visible = false;
 
@@ -1115,7 +1128,30 @@ Component {
 
                 }
             }
-
+            // 31102016 [S] Boundary
+            MapRectangle {
+                        id: myBoundary
+//                        color: "yellow"
+                        border.width: 5
+                        border.color: "white"
+                        topLeft {
+                            latitude: 0
+                            longitude: 145
+                        }
+                        bottomRight {
+                            latitude: -25
+                            longitude: -120
+                        }
+                        visible: cbBoundary.checked
+            }
+            // 31102016 [E] Boundary
+            // 31102016 [S] Boundary
+            function initMap()
+            {
+                map.addMapItem(myBoundary)
+            }
+            Component.onCompleted: initMap()
+            // 31102016 [E] Boundary
          }
 
         MouseArea {

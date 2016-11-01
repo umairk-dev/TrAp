@@ -1,6 +1,12 @@
 #include "forecastthread.h"
 #include "plotpoint.h"
 
+#if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
+#define Q_OS_MOBILE
+#else
+#define Q_OS_DESKTOP
+#endif
+
 ForecastThread::ForecastThread(Prediction *prediction)
 {
         this->prediction = prediction;
@@ -48,7 +54,7 @@ QList<QString> * ForecastThread::getMonitorValues(QString name){
 
 
 void ForecastThread::doForecast(){
-
+    #ifdef  Q_OS_DESKTOP
     QObject * mapView = prediction->getEngine()->rootObjects().at(0)->findChild<QObject*>("map");
     QString msg = "loading Monitors";
 
@@ -144,11 +150,14 @@ void ForecastThread::doForecast(){
     delete ella;
     delete result;
     delete m;
+    #endif
 }
 
 int ForecastThread::roundLambda( double value )
 {
+#ifdef  Q_OS_DESKTOP
   return INT32_C(floor( value + 0.5 ));
+#endif
 }
 
 PResult *  ForecastThread::processLambda(int year, QList<double>* data){

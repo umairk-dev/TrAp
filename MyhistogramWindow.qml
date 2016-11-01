@@ -55,10 +55,10 @@ ApplicationWindow {
                 spacing : 20
             ChartView {
                 id: cvShow
-                title: {if(predictionData.length > 1){ "Hindcast of cyclones - Year " + yearrange[cbhgwin.currentIndex]}
+                title: {if(predictionData.length > 1){ "Hindcast of cyclones - " + cbhgwin.currentText}//yearrange[cbhgwin.currentIndex]}
                     else {"Forecast of cyclones in selected region - Year " + Qt.formatDateTime(new Date(), "yyyy")} }
-                width: 640
-                height: 480
+                width: 780
+                height: 550
                 anchors.top :parent.top
                 anchors.right: parent.right
                 antialiasing: true

@@ -3,6 +3,13 @@
 #include "prediction.h"
 #include "mathexpr.h"
 #include "presult.h"
+
+#if defined Q_OS_BLACKBERRY || defined Q_OS_ANDROID || defined Q_OS_IOS || defined Q_OS_WP
+#define Q_OS_MOBILE
+#else
+#define Q_OS_DESKTOP
+#endif
+
 HindcastThread::HindcastThread(Prediction *prediction)
 {
     this->prediction = prediction;
@@ -50,7 +57,7 @@ QList<QString> * HindcastThread::getMonitorValues(QString name){
 
 
 void HindcastThread::doHindcast(){
-
+    #ifdef  Q_OS_DESKTOP
     QObject * mapView = prediction->getEngine()->rootObjects().at(0)->findChild<QObject*>("map");
     QString msg = "loading Monitors";
 
@@ -175,12 +182,16 @@ void HindcastThread::doHindcast(){
 
     delete m;
    // delete mapView;
-
+#endif
 }
 
 int HindcastThread::roundLambda( double value )
 {
+  #ifdef  Q_OS_DESKTOP
   return INT32_C(floor( value + 0.5 ));
+  #else
+    return 0;
+  #endif
 }
 
 PResult *  HindcastThread::processLambda(int year, QList<double>* data){
