@@ -383,6 +383,7 @@ ApplicationWindow  {
                     id: cbBoundary
                     text: "Boundary"
                     checked: isBoundarychecked
+                    onCheckedChanged: Controls.setBoundrySelected(cbBoundary.checked);
                 }
                 ToolButton {
                     id : btnFilter

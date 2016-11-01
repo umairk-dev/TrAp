@@ -21,9 +21,7 @@ void PredictionThread::run()
      int count = 0;
      int year = 1970;
      for(int i = 0; i <= data.size(); i++){
-          if(prediction->getYearCount().value(QString::number(year)) > 0){
-            count++;
-          }
+          count += prediction->getYearCount().value(QString::number(year));
           year++;
      }
 

@@ -24,11 +24,11 @@ private:
      QQmlApplicationEngine* _engine;
      QVariantList cyclones;
      void freeMemory();
+     bool isBoundrySelected;
 
 public
-
-
      slots:
+     void setBoundrySelected(bool boundry);
      void clearMap();
      void controlMapMouse(const bool& status);
      void handleSubmitTextField(const QString& in);
@@ -42,7 +42,6 @@ public
      void searchCycloneServiceFinished(QNetworkReply* reply);
      void generateReport(const QString &path, const QVariant &cyclones);
      void getModelList();
-
      void updateModel(const QString& model, const QVariant& data, const QString& modelID);
 };
 

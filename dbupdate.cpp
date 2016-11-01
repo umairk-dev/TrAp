@@ -143,7 +143,6 @@ void DBUpdate::updateServiceFinished(QNetworkReply* reply)
                          foreach (const QJsonValue & valueT, tracksArray)
                          {
                              QJsonObject objT = valueT.toObject();
-
                              QString id = objT["id"].toString();
                              QString lng = objT["longitude"].toString();
                              QString lat = objT["latitude"].toString();

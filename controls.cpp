@@ -12,7 +12,7 @@
 
 Controls::Controls(QObject  *parent) : QObject (parent)
 {
-
+    setBoundrySelected(true);
 }
 
 
@@ -24,6 +24,9 @@ void Controls::setEngine(QQmlApplicationEngine * engine){
     _engine = engine;
 }
 
+void Controls::setBoundrySelected(bool boundry){
+    isBoundrySelected = boundry;
+}
 
 void Controls::handleSubmitTextField(const QString &in)
 {
@@ -311,11 +314,12 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
 
         if(jsonObject.keys().contains("cyclones")){
+            bool isInRegion = false;
             qDebug() << strReply;
             QJsonArray jsonArray = jsonObject["cyclones"].toArray();
             foreach (const QJsonValue & value, jsonArray)
             {
-
+                isInRegion = false;
                 QJsonObject obj = value.toObject();
                 QJsonObject objC = obj["cyclone"].toObject();
                 Cyclone * cyclone = new Cyclone;
@@ -337,15 +341,29 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
 
                     QJsonArray tracksArray = obj["tracks"].toArray();
                     qDebug() << tracksArray.size();
+                    bool isFirstTrack  = true;
+
+
                     foreach (const QJsonValue & valueT, tracksArray)
                     {
                         QJsonObject objT = valueT.toObject();
-
                         QString id = objT["id"].toString();
                         QString lng = objT["longitude"].toString();
                         QString lat = objT["latitude"].toString();
                         QString wind = objT["wind"].toString();
                         QString pressure = objT["pressure"].toString();
+/*
+                        bool chkLat = false;
+                        bool chkLng = false;
+                        if(lat.toDouble() <= 0 && lat.toDouble() >= -25 ) {
+                            chkLat = true;
+                        }
+
+                        if(lng.toDouble() <= 145 && lng.toDouble() >= -120){
+
+                            chkLng = true;
+                        }*/
+
 
                         CycloneTrack * tracks = new CycloneTrack;
                         tracks->setCycloneID(objT["cyclone"].toString());
@@ -356,20 +374,44 @@ void Controls::searchCycloneServiceFinished(QNetworkReply* reply)
                         tracks->setWindSpeed(wind.toDouble());
                         tracks->setBasin(objT["basin"].toString());
                         tracks->setSubBasin(objT["sub_basin"].toString());
-                        //tracks->setNature(objT["nature"].toString());
                         tracks->setDateTime(objT["track_date"].toString());
-                       // tracks->increaseAccuracy();
                         QVariant varT;
                         varT.setValue(tracks);
+
+                       /* if(isBoundrySelected){
+                            if(chkLng && chkLat){
+                                cycloneTracks.append(varT);
+                                if(isFirstTrack)
+                                   isInRegion = true;
+                            }else{
+                                cycloneTracks.append(varT);
+                                break;
+                            }
+                        }else{
+
+
+                        }
+
+                        isFirstTrack = false;*/
+
                         cycloneTracks.append(varT);
                     }
-                        qDebug() << "tracks" << cycloneTracks.size();
+                    qDebug() << "tracks" << cycloneTracks.size();
+                //    if(isBoundrySelected && isInRegion)
+                 //       cyclone->setTracks(cycloneTracks);
 
+                  //  else if(!isBoundrySelected)
                         cyclone->setTracks(cycloneTracks);
+
                 }
-                QVariant varC;
-                varC.setValue(cyclone);
-                cyclones.append(varC);
+
+              //  if( (isBoundrySelected  && isInRegion) || !isBoundrySelected){
+                    QVariant varC;
+                    varC.setValue(cyclone);
+                    cyclones.append(varC);
+            //    }else{
+            //        delete cyclone;
+            //    }
             }
         }
 
@@ -443,6 +485,8 @@ void Controls::updateModel(const QString& model, const QVariant& data, const QSt
         db.updateData(var, modelID.toInt());
  //       qDebug() << list.at(i)<<endl;
     }
+
+    delete m;
 
 }
 

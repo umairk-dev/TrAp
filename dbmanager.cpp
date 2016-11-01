@@ -537,6 +537,37 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
 
                  bool chkLat = false;
                  bool chkLng = false;
+                 if(latTo < 0){
+                      if(lat <= latFrom && lat >= latTo)
+                          chkLat = true;
+                 }else{
+                    if(lat >= latFrom && lat <= latTo)
+                        chkLat = true;
+                 }
+
+                 if(lngTo < 0){
+                    if(lngFrom > 0){
+                        if( (lng >= lngFrom && lng <= 180)
+                                || (lng >= -180 && lng <= lngTo))
+                            chkLng = true;
+
+                    }else{
+                      if(lngFrom < lngTo){
+                          if(lng >= lngFrom && lng <= lngTo)
+                              chkLng = true;
+                      }else{
+                          if(lng <= lngFrom && lng >= lngTo)
+                              chkLng = true;
+                      }
+
+                    }
+                 }else{
+                     if(lng>= lngFrom && lng <= lngTo)
+                         chkLng = true;
+                 }
+
+
+                 /*
                  if(latTo < latFrom && ( lat <= latFrom && lat >= latTo ) ){
 
                      chkLat = true;
@@ -550,7 +581,7 @@ QHash<QString, int> DbManager::searchArea(double latFrom, double lngFrom,double 
                      chkLng = true;
                  }else if(lng >= lngFrom && lng <= lngTo){
                      chkLng = true;
-                 }
+                 }*/
 
                  if(chkLng && chkLat){
                      yearsCount[year] = yearsCount.value(year) + 1;
